@@ -1,0 +1,11 @@
+<Week1>
+I join in a group and talk about the project we gonna do.
+I read the project description and get some comprehension.
+I update some raw user stories in Jira.
+
+<Week2>
+I communicate with team and finalize the user stories.
+I write the background of our project.
+I learn something about Git.
+
+<Week3>
