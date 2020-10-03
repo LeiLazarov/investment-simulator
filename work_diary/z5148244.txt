@@ -9,3 +9,6 @@ I write the background of our project.
 I learn something about Git.
 
 <Week3>
+I revise the background, making it shorter and more reasonable.
+
+<Week4>
