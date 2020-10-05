@@ -1,2 +1,8 @@
 Week 1
 Group formed. We had the first meeting, got to know each other and discussed proposal.
+
+Week 2
+This week, we focused on the user story part of our proposal. I drew some interface and flow diagrams. At the end of the week, we confirmed our user stories and planned what we should improve next week.
+
+Week 3
+We completed our proposal this week and planned to start programming.
