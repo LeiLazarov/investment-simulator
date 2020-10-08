@@ -12,3 +12,6 @@ I learn something about Git.
 I revise the background, making it shorter and more reasonable.
 
 <Week4>
+I learn something about Django and try to build a simple blog system, preparing for development tasks.
+
+<Week5>
