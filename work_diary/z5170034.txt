@@ -11,3 +11,7 @@ And after discussion in our meeting,
     assigned the task of "draft wireframes design" to teammates Yiwen Hu and Yue Sun, due at 29 Sep
     assigned the task of "draft software architecture diagram" to myself, due at 29 Sep
 
+<week 3>
+I finished the part of system architecture diagram for the proposal, as well as its description. And submitted our
+proposal in time.
+
