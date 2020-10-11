@@ -15,3 +15,4 @@ I revise the background, making it shorter and more reasonable.
 I learn something about Django and try to build a simple blog system, preparing for development tasks.
 
 <Week5>
+I program a module about 'contact us' page, in this way, getting farmiliar with Django project and Git/Github.
