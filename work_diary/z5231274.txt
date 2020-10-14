@@ -6,3 +6,8 @@ This week, we focused on the user story part of our proposal. I drew some interf
 
 Week 3
 We completed our proposal this week and planned to start programming.
+
+Week 4
+I build a web page(tutorial page) base on the Django framework this week.
+
+Week 5

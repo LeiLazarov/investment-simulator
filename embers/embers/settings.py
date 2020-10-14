@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'login',
     'contact_us',   # added by Yiren
+    'tutorial'
 ]
 
 MIDDLEWARE = [

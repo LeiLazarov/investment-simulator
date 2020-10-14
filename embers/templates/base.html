@@ -22,8 +22,8 @@
     <div class="navbar-container">
       <nav class="navbar navbar-expand-lg navbar-light" data-overlay data-sticky="top">
         <div class="container">
-          <a class="navbar-brand navbar-brand-dynamic-color fade-page" href="index.html">
-            <img alt="Embers" data-inject-svg src="{% static 'img/logos/jumpstart.svg' %}">
+          <a class="navbar-brand navbar-brand-dynamic-color fade-page" href="{% url 'index' %}">
+            <img alt="Embers" data-inject-svg src="{% static 'img/logos/logo.svg' %}">
           </a>
 {#          <h1>{{ request.session.user_name }}</h1>#}
 {#          <p>#}
@@ -39,54 +39,16 @@
           <div class="collapse navbar-collapse order-3 order-lg-2 justify-content-lg-end" id="navigation-menu">
             <ul class="navbar-nav my-3 my-lg-0">
               <li class="nav-item">
-                <div class="dropdown">
-                  <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle nav-link nav-item arrow-bottom" data-toggle="dropdown-grid" href="#" role="button">About us</a>
-                </div>
+                  <a aria-expanded="false" aria-haspopup="true" class=" nav-link nav-item" href="{% url 'index' %}" role="button">Home</a>
               </li>
               <li class="nav-item">
-                <div class="dropdown">
-                  <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle nav-link nav-item arrow-bottom" data-toggle="dropdown-grid" href="#" role="button">Tutorials</a>
-                  <div class="row dropdown-menu">
-                    <div class="col-auto" data-dropdown-content>
-                      <div class="dropdown-grid-menu">
-                        <div class="dropdown">
-                          <a aria-expanded="false" aria-haspopup="true" class="dropdown-item" data-toggle="dropdown-grid" href="#" role="button">Company</a>
-                          <div class="row dropdown-menu">
-                            <div class="col-auto" data-dropdown-content>
-                              <div class="dropdown-grid-menu"><a href="company-about-1.html" class="dropdown-item fade-page">About 1</a><a href="company-about-2.html" class="dropdown-item fade-page">About 2</a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <a aria-expanded="false" aria-haspopup="true" class=" nav-link nav-item"  href="#" role="button">SimTrade</a>
               </li>
               <li class="nav-item">
-                <div class="dropdown">
-                  <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle nav-link nav-item arrow-bottom" data-toggle="dropdown-grid" href="#" role="button">Features</a>
-                  <div class="row dropdown-menu">
-                    <div class="col-auto" data-dropdown-content>
-                      <div class="dropdown-grid-menu">
-                          <a href="style-guide.html" class="dropdown-item fade-page">Style Guide</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <a aria-expanded="false" aria-haspopup="true" class=" nav-link nav-item"  href="{% url 'tutorial:intro' %}" role="button">Tutorial</a>
               </li>
               <li class="nav-item">
-                <div class="dropdown">
-                  <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle nav-link nav-item arrow-bottom" data-toggle="dropdown-grid" href="#" role="button">Contact us</a>
-                  <div class="row dropdown-menu">
-                    <div class="col-auto" data-dropdown-content>
-                      <div class="dropdown-grid-menu">
-                        <a href="{% url 'contact_us:contact_us' %}" class="dropdown-item" target="_blank" role="button">Documentation</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <a aria-expanded="false" aria-haspopup="true" class=" nav-link nav-item"href="{% url 'contact_us:contact_us' %}" role="button">About us</a>
               </li>
             </ul>
           </div>
