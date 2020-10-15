@@ -5,3 +5,6 @@ I joined the github.
 I talked the userstory with my group.
 I began to draw the UI graph.
 Week03
+I completed the UI graph and added it to the final proposal.
+Week04
+I studied the frame of Django and the knowlege about html.
