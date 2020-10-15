@@ -15,3 +15,11 @@ And after discussion in our meeting,
 I finished the part of system architecture diagram for the proposal, as well as its description. And submitted our
 proposal in time.
 
+<week 4>
+I have built a complete development framework based on django and bootstrap, which contains a managing site for back-end,
+and uniform style for front-end, after which I have shared the developing flow how to code based on the framework, and
+some advices how to learn it fast.
+Besides, I have been working on registration and login functions, and assigned tasks that suit to do in initial phrase
+to teammates.
+
+
