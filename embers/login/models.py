@@ -5,8 +5,13 @@ from django.db import models
 
 class User(models.Model):
     username = models.CharField(unique=True, max_length=128)
+    email = models.EmailField(unique=True)
     password = models.CharField(blank=False, null=False, max_length=256)
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.username
+        return 'User' + self.username
+
+    class Meta:
+        verbose_name_plural = 'Users'
 
