@@ -20,5 +20,6 @@ from . import views
 app_name = 'sim_trade'
 
 urlpatterns = [
+    path('detail/', views.detail, name='detail'),
     path('sim_trade/', views.sim_trade, name='sim_trade'),
 ]
