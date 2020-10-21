@@ -50,7 +50,7 @@
 {% endblock %}
 
 {% block script_content %}
-    <script type="text/javascript" src="{% static 'js/echarts.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/echarts-en.min.js' %}"></script>
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById('chartContainer'));
         var upColor = '#00da3c';
@@ -100,7 +100,7 @@
                 legend: {
                     bottom: 10,
                     left: 'center',
-                    data: ['Dow-Jones index', 'MA5', 'MA10', 'MA20', 'MA30']
+                    data: ['Stock Price', 'MA5', 'MA10', 'MA20', 'MA30']
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -234,7 +234,7 @@
                 ],
                 series: [
                     {
-                        name: 'Dow-Jones index',
+                        name: 'Stock Price',
                         type: 'candlestick',
                         data: data.values,
                         itemStyle: {
