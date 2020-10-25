@@ -1,12 +1,31 @@
-from django.shortcuts import render
+import requests
+from django.shortcuts import render, redirect
 from sim_trade import models
 from datetime import datetime
 import json
 import datetime
 # Create your views here.
 
+
 def sim_trade(request):
-    return render(request, 'sim_trade/sim_trade.html')
+    if request.method == 'GET':
+        # print('get')
+        return render(request, 'sim_trade/sim_trade.html')
+    elif request.method == 'POST':
+        stock_code = request.POST.get('stock_code')
+        stock_quote = requests.get(
+            'https://finnhub.io/api/v1/quote?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug')
+        company_info = requests.get(
+            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug'
+        )
+
+        # stock_candles = requests.get('https://finnhub.io/api/v1/stock/candle?symbol=' + stock_code
+        #                              + '&resolution=D&from=1572651390&to=1572910590&token=buajtbf48v6ocn3pc8ug')
+        # print(stock_quote.json())
+        print(company_info.json())
+        # print(stock_candles.json())
+        return render(request, 'sim_trade/stock.html', {'stock': stock_quote.json(), 'company_info': company_info.json()})
+
 
 def detail(request):
     stock = models.Detail.objects.get(pk=1)
