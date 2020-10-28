@@ -12,3 +12,9 @@ I build a web page(tutorial page) base on the Django framework this week.
 
 Week 5
 We hold the retrospective meeting and discussed the next development plan. I will be mainly responsible for the trade part.
+
+Week 6
+I implement the front edge part of the simulation trade page.
+
+Week 7
+I will finish the simulation trade page in this week.
