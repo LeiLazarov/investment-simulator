@@ -1,3 +1,5 @@
+import time
+
 import requests
 from django.shortcuts import render, redirect
 from sim_trade import models
@@ -22,9 +24,15 @@ def sim_trade(request):
         # stock_candles = requests.get('https://finnhub.io/api/v1/stock/candle?symbol=' + stock_code
         #                              + '&resolution=D&from=1572651390&to=1572910590&token=buajtbf48v6ocn3pc8ug')
         # print(stock_quote.json())
-        print(company_info.json())
+        stock_time = stock_quote.json()['t']
+        stock_time = time.localtime(stock_time)
+        stock_time = time.strftime('%Y-%m-%d %H:%M:%S', stock_time)
+        # print(company_info.json()['logo'])
+        # print(stock_time)
+        # print(company_info.json())
         # print(stock_candles.json())
-        return render(request, 'sim_trade/stock.html', {'stock': stock_quote.json(), 'company_info': company_info.json()})
+        return render(request, 'sim_trade/stock.html', {'stock': stock_quote.json(), 'company_info': company_info.json(),
+                                                        'stock_time': stock_time})
 
 
 def detail(request):

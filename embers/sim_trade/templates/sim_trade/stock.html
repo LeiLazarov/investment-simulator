@@ -13,19 +13,23 @@
         <div class="row justify-content-center">
           <div class="col-xl-5 col-lg-9 col-md-10 mb-3 mb-sm-5" data-aos="fade-up" data-offset="200">
             <div class="card card-body hover-box-shadow bg-white">
-              <img src="{{ company_info.logo }}" alt="Joshua Lapinsky profile image" class="avatar mt-md-n5 mb-3">
+                {% if company_info.logo %}
+                    <img src="{{ company_info.logo }}" alt="Joshua Lapinsky profile image" class="avatar mt-md-n5 mb-3">
+                {% else %}
+                    <img src="{% static 'img/logos/default_logo.png' %}" alt="Joshua Lapinsky profile image" class="avatar mt-md-n5 mb-3">
+                {% endif %}
               <div>
 
                 <a href="#">
                   <h4 class="h3">{{ company_info.name}}</h4>
                 </a>
                 <p>current price: ${{ stock.c }}</p>
-                <p>price in the previous day: ${{ stock.pc }}</p>
                 <p>low price today: ${{ stock.l }}</p>
                 <p>high price today: ${{ stock.h }}</p>
+                <p>price in the previous day: ${{ stock.pc }}</p>
                 <div>
-                    <a href="#" class="stretched-link">Check more</a>
-                    <span class="text-muted mb-3" style="float: right">{{ stock.t }}</span>
+                    <a href="#" class="stretched-link">Click to add</a>
+                    <span class="text-muted mb-3" style="float: right">{{ stock_time }}</span>
                 </div>
 
               </div>
