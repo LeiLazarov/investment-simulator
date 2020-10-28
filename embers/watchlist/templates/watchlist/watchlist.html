@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div data-overlay class="bg-primary-3 text-white o-hidden">
+        <section>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-xl-8 col-lg-9 text-center">
+                        <h1 class="display-3">My Watchlist</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="divider divider-bottom bg-light"></div>
+    </div>
+
+    <section class="bg-light">
+        <div class="container">
+            <div class="row justify-content-between align-items-start">
+                <div class="col-lg-8">
+                    {% for stock in my_watchlist %}
+                        <div class="mb-3 mb-sm-4">
+                            <a href="#" class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow">
+                                <div style="width: 100%;">
+                                    <span>{{ stock.symbol}}</span>
+                                    <span style="float: right; margin-left: 12%;">{{ stock.user.username }}</span>
+                                    <div style="margin-bottom: 1%; margin-top: 1%">
+                                        <span >${{ stock.stock_quote.c }}</span>
+                                    </div>
+                                    <p>percentage change</p>
+                                    <p class="card-text">{{ stock.createdAt }}</p>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-auto">
+                            <nav>
+                                {% if my_watchlist.has_other_pages %}
+                                <ul class="pagination">
+                                    {% if my_watchlist.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link rounded" href="?page={{ my_watchlist.previous_page_number }}" aria-label="Previous">
+                                            <img src="{% static 'img/icons/interface/icon-arrow-left.svg' %}" alt="Arrow Left" class="icon icon-xs bg-primary" data-inject-svg>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    {% for i in my_watchlist.paginator.page_range %}
+                                        {% if my_watchlist.number == i %}
+                                            <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                                        {% else %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if my_watchlist.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link rounded" href="?page={{ my_watchlist.next_page_number }}" aria-label="Next">
+                                            <img src="{% static 'img/icons/interface/icon-arrow-right.svg' %}" alt="Arrow Right" class="icon icon-xs bg-primary" data-inject-svg>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+{% endblock %}
