@@ -21,3 +21,12 @@ class Detail(models.Model):
     logo = models.FileField(upload_to='logos/',default='logos/empty.png',storage=fs) # Logo image
     industry = models.CharField(null=False, max_length=32) # Industry classification
     updateAt = models.DateTimeField(auto_now_add=True) # The last update date
+
+class Owned(models.Model):
+    ownedID = models.AutoField(primary_key=True)
+    userID = models.CharField(max_length=64)
+    stockID = models.CharField(max_length=64)
+    quantity = models.IntegerField()
+    avg_price = models.FloatField()
+    min_price = models.FloatField()
+    max_price = models.FloatField()
