@@ -16,3 +16,6 @@ I learn something about Django and try to build a simple blog system, preparing 
 
 <Week5>
 I program a module about 'contact us' page, in this way, getting farmiliar with Django project and Git/Github.
+
+<Week6>
+Try to finish a 'search bar' module and fail. Improve team member CaoLei's code and develop this module.

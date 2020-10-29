@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include('login.urls')),
     path('', include('tutorial.urls')),
     path('', include('sim_trade.urls')),
+    path('', include('watchlist.urls')),
     path('', include('stock.urls')),
     # server是一个视图函数server(request, path), 通过path找到文件然后返回response
     re_path(r'media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),

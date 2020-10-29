@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <section class="bg-primary-3 text-white" id="not_found_stock">
+      <div class="container">
+        <div class="row section-title justify-content-center text-center">
+          <div class="col-md-9 col-lg-8 col-xl-7">
+            <h2 class="display-3">The stock you search is not found</h2>
+          </div>
+        </div>
+
+        <div>
+          <div class="row justify-content-center">
+              <img src="{% static 'img/search_not_found.png' %}" height="40%" width="40%"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+{% endblock %}
