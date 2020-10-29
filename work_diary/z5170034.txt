@@ -22,4 +22,16 @@ some advices how to learn it fast.
 Besides, I have been working on registration and login functions, and assigned tasks that suit to do in initial phrase
 to teammates.
 
+<week 5>
+I have prepared the presentation for Demo A, and we got a good grade for it.
+Also I organized the meeting for Retrospective A to collect the reflections from my team, and draft a version of the
+report.
 
+<week 6>
+I finished the final modification of the Retrospective A report, and submit it as required.
+I have built a initial stock search module including search function and the result returning for my teammate Yiren Hu
+to develop further.
+
+<week 7>
+I have built a initial 'my watchlist' app including presenting stock list with paginator, and view a graph of single stock
+for my teammate Di Wu to develop further.
