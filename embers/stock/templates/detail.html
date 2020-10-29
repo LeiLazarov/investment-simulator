@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}
+    {{ stock.symbol }}
+{% endblock %}
+
 {% block content %}
     <link href="{% static 'css/detail.css' %}" rel="stylesheet" type="text/css" media="all"/>
     <div>
@@ -11,7 +15,7 @@
                         <header class="header">
                             <div class="header_left">
                                 <div class="header_photo"><img class="header_photo-img"
-                                                               src="{{ MEDIA_URL }}logos/{{ stock.logo }}"
+                                                               src="{{ stock.logo }}"
                                                                alt="{{ stock.cmpname }}">
                                 </div>
                                 <div class="ml-4">
@@ -39,6 +43,38 @@
                                 </ul>
                             </div>
                         </header>
+                        <div class="d-flex w-100 m-3 text-center">
+                            <div class="p-2 flex-fill">
+                                <div class="numbers">
+                                    <p>Current Price</p>
+                                    <h4 class="mt-2 card-title">{{ price.price|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                            <div class="p-2 flex-fill">
+                                <div class="numbers">
+                                    <p>Day's Open Price</p>
+                                    <h4 class="mt-2 card-title">{{ price.open|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                            <div class="p-2 flex-fill">
+                                <div class="numbers">
+                                    <p>Day's High Price</p>
+                                    <h4 class="mt-2 card-title">{{ price.high|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                            <div class="p-2 flex-fill">
+                                <div class="numbers">
+                                    <p>Day's Low Price</p>
+                                    <h4 class="mt-2 card-title">{{ price.low|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                            <div class="p-2 flex-fill">
+                                <div class="numbers">
+                                    <p>Prvious Close Price</p>
+                                    <h4 class="mt-2 card-title">{{ price.close|floatformat:2 }}</h4>
+                                </div>
+                            </div>
+                        </div>
                         <div id="chartContainer" style="width: 100%;height: 800px;"></div>
                     </div>
                 </div>
@@ -90,10 +126,8 @@
             return result;
         }
 
-        $.get('{{MEDIA_URL}}candles/aapl.json', function (rawData) {
-
+        $.get('{{MEDIA_URL}}candles/{{stock.symbol}}.json', function (rawData) {
             var data = splitData(rawData);
-
             myChart.setOption(option = {
                 backgroundColor: '#fff',
                 animation: false,

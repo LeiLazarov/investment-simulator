@@ -17,10 +17,9 @@ from django.urls import path,re_path
 
 from . import views
 
-app_name = 'sim_trade'
+app_name = 'stock'
 
 urlpatterns = [
-    path('table/', views.table, name='table'),
-    path('sim_trade/', views.sim_trade, name='sim_trade'),
-    re_path(r'sim_trade/getOwned/', views.getOwned, name='getOwned'),
+    re_path(r'^stock/(.+)/$', views.stock, name='stock'),
+
 ]

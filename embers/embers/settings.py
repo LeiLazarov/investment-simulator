@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'login',
     'tutorial',
     'sim_trade',
+    'stock', # app for showing stock detail
 ]
 
 MIDDLEWARE = [
