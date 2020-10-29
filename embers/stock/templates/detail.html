@@ -92,24 +92,6 @@
         var upColor = '#00da3c';
         var downColor = '#ec0000';
 
-
-        function splitData(rawData) {
-            var categoryData = [];
-            var values = [];
-            var volumes = [];
-            for (var i = 0; i < rawData.length; i++) {
-                categoryData.push(rawData[i].splice(0, 1)[0]);
-                values.push(rawData[i]);
-                volumes.push([i, rawData[i][4], rawData[i][0] > rawData[i][1] ? 1 : -1]);
-            }
-
-            return {
-                categoryData: categoryData,
-                values: values,
-                volumes: volumes
-            };
-        }
-
         function calculateMA(dayCount, data) {
             var result = [];
             for (var i = 0, len = data.values.length; i < len; i++) {
@@ -126,8 +108,7 @@
             return result;
         }
 
-        $.get('{{MEDIA_URL}}candles/{{stock.symbol}}.json', function (rawData) {
-            var data = splitData(rawData);
+        $.get('{{MEDIA_URL}}candles/{{stock.symbol}}.json', function (data) {
             myChart.setOption(option = {
                 backgroundColor: '#fff',
                 animation: false,

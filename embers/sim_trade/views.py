@@ -46,5 +46,7 @@ def getOwned(request):
     queryset = models.Owned.objects.filter(userID=1)
     fields = ('ownedID', 'stockID', 'quantity', 'avg_price', 'min_price', 'max_price')
     res = json.loads(serialize('json', queryset, fields=fields))
-
-    return JsonResponse(res,safe=False)
+    data = []
+    for row in res:
+        data.append(row['fields'])
+    return JsonResponse(data,safe=False)

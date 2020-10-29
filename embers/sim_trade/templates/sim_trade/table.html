@@ -4,7 +4,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}
-SimTrade
+    SimTrade
 {% endblock %}
 {% block content %}
     <link href="{% static 'css/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" media="all"/>
@@ -60,9 +60,7 @@ SimTrade
                 </div>
 
                 <h2>Owned Stocks</h2>
-                <div class="table-responsive">
-                    <table id="ownedStock" class="table table-striped table-sm"></table>
-                </div>
+                <table id="ownedStock"></table>
             </div>
         </div>
     </section>
@@ -209,7 +207,7 @@ SimTrade
             return new Date(parseInt(nS) * 1000).toLocaleTimeString();
         }
     </script>
-        <script>
+    <script>
         var queryUrl = '/sim_trade/getOwned/'//should use session
         $('#ownedStock').bootstrapTable({
             url: queryUrl,
