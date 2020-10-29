@@ -1,10 +1,11 @@
 import requests
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from sim_trade import models
 import json
 from django.http import HttpResponse
 from django.core.serializers import serialize
 from decimal import *
+
 
 # Create your views here.
 
@@ -60,36 +61,44 @@ def getOwned(request):
 
 
 def buy_stock(request):
-    buy_res = 'Fail'
-    if request.POST:
-        s_symbol = request.POST['bsym']
-        s_price = Decimal(request.POST['val']).quantize(Decimal('.00'), rounding=ROUND_DOWN)
-        s_num = int(request.POST['qua'])
-        uid = request.session.get('user_id', '')
-        try:
-            record = models.Owned.objects.filter(userID=uid,stockID=s_symbol)
-            if record.exists():
-                element = record.first()
-                num = element.quantity + s_num
-                avg = ((element.quantity*element.avg_price+s_num*s_price)/num).quantize(Decimal('.00'), rounding=ROUND_DOWN)
-                element.quantity = num
-                element.avg_price = avg
-                if s_price>element.max_price:
-                    element.max_price = s_price
-                elif s_price<element.min_price:
-                    element.min_price = s_price
-                else:
-                    element.save()
+    ret = {'type': 'fail', 'message': ''}
+    data = json.loads(request.body)
+    s_symbol = data['symbol']
+    s_price = Decimal(data['price']).quantize(Decimal('.00'), rounding=ROUND_DOWN)
+    s_num = int(data['number'])
+    uid = request.session.get('user_id', '')
+    try:
+        record = models.Owned.objects.filter(userID=uid, stockID=s_symbol)
+        if record.exists():
+            element = record.first()
+            num = element.quantity + s_num
+            avg = ((element.quantity * element.avg_price + s_num * s_price) / num).quantize(Decimal('.00'),
+                                                                                            rounding=ROUND_DOWN)
+            element.quantity = num
+            element.avg_price = avg
+            if s_price > element.max_price:
+                element.max_price = s_price
+            elif s_price < element.min_price:
+                element.min_price = s_price
             else:
-                models.Owned.objects.create(
-                    userID=uid,
-                    stockID=s_symbol,
-                    quantity=s_num,
-                    avg_price=s_price,
-                    min_price=s_price,
-                    max_price=s_price,
-                )
-        except Exception as e:
-            buy_res = 'Fail'
-            return redirect("/table/")
-        return redirect("/table/")
+                element.save()
+        else:
+            models.Owned.objects.create(
+                userID=uid,
+                stockID=s_symbol,
+                quantity=s_num,
+                avg_price=s_price,
+                min_price=s_price,
+                max_price=s_price,
+            )
+        models.Record.objects.create(
+            userID=uid,
+            stockID=s_symbol,
+            quantity=s_num,
+            price=s_price,
+            type=False  # buy: false, sell: true
+        )
+    except Exception as e:
+        return HttpResponse(json.dumps(ret), content_type="application/json")
+    ret['type'] = 'success'
+    return HttpResponse(json.dumps(ret), content_type="application/json")

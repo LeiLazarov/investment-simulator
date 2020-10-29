@@ -85,15 +85,11 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="form-group row alert alert-danger d-none" id="checkTip" role="alert"> No data
-                                found, please
-                                check the symbol!
-                            </div>
                             <div class="form-group row d-none bg-light" id="stockInfo">
                                 <label for="curP" class="col-sm-3 col-form-label">CURRENT</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="curP"
-                                           name="val" value="">
+                                           value="">
                                 </div>
                                 <label for="highP" class="col-sm-3 col-form-label">DAY'S HIGH</label>
                                 <div class="col-sm-3">
@@ -121,6 +117,10 @@
                                            value="">
                                 </div>
                             </div>
+                            <div class="form-group row alert alert-danger d-none" id="checkTip" role="alert"> No data
+                                found, please
+                                check the symbol!
+                            </div>
                             <div class="form-group row">
                                 <label for="quantity" class="col-sm-4 col-form-label">QUANTITY</label>
                                 <input type="number" class="form-control col-sm-4" id="quantity" disabled
@@ -128,7 +128,8 @@
                             </div>
                             <div class="form-group text-right row">
                                 <div class="col-sm-8">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button id="submit" type="button" onclick="orderSubmit()" class="btn btn-primary">Submit
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -197,9 +198,10 @@
             }
             var chgC = parseFloat(cash - unit * price).toFixed(2);
             var chgS = parseFloat(stock - unit * price).toFixed(2);
-            $("span#chgC").text(" - $" + unit * price + " = $" + chgC);
+            var chg = parseFloat(unit * price).toFixed(2)
+            $("span#chgC").text(" - $" + chg + " = $" + chgC);
             $("span#chgC").css("color", "red");
-            $("span#chgS").text(" + $" + unit * price + " = $" + chgS);
+            $("span#chgS").text(" + $" + chg + " = $" + chgS);
             $("span#chgS").css("color", "green");
             $("input#quantity").val(parseInt(unit));
         }
@@ -208,35 +210,35 @@
             return new Date(parseInt(nS) * 1000).toLocaleTimeString();
         }
 
-        $('#ajax_submit').click(function () {
+        function orderSubmit() {
+            $('#submit').attr("disabled", true);
             $.ajax({
-                url: "/login_ajax.html",
-                //data: {user: $('#u').val(), email: $('#e').val(), pwd: $('#p').val()},
-                data: $('#f1').serialize(),
+                headers: {
+                    'x-csrftoken': $('[name="csrfmiddlewaretoken"]').val(),
+                },
+                url: "/buy_stock",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    "symbol": $('input#symbol').val(),
+                    "price": $('input#curP').val(),
+                    "number": $('input#quantity').val()
+                }),
                 type: 'POST',
-                success: function (arg) {
-
-                    $('.error-msg').remove();
-                    var v1 = JSON.parse(arg);
-                    console.log(v1);
-                    if (!v1.status) {
-                        // var error_obj = JSON.parse(v1.error);
-                        var error_obj = v1.error;
-                        $.each(error_obj, function (k, v) {
-                            // k: user 或 email
-                            // v: [{}{}{},]
-                            var tag = document.createElement('span');
-                            tag.className = 'error-msg';
-                            tag.innerHTML = v[0].message;
-                            $("input[name='" + k + "']").after(tag);
-                        })
+                success: function (res) {
+                    if (res.type == 'success') {
+                        $('#checkTip').removeClass('alert-danger')
+                        $('#checkTip').addClass('alert-success')
+                        $('#checkTip').html('Success!')
+                        $('#checkTip').removeClass('d-none')
                     } else {
-                        location.href = "/index.html"
+                        $('#checkTip').html('Fail! Please try again!')
+                        $('#checkTip').removeClass('d-none')
                     }
-                    // { 'stauts': true, 'error':xx, 'data'：’‘}
+                    setTimeout(function(){window.location.reload();},3000);
                 }
             })
-        })
+        }
     </script>
     <script>
         var queryUrl = '/sim_trade/getOwned/'//should use session
