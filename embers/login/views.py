@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
-
 from login import models
-
 
 def index(request):
     return render(request, 'index.html')
@@ -13,6 +11,7 @@ def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        remember = request.POST.get('remember')
         message = 'check input contents'
         if username.strip() and password.strip():
             try:
@@ -21,10 +20,13 @@ def login(request):
                 message = 'username does not exist!'
                 return render(request, 'login/login.html', {'message': message})
             if user.password == password:
-                # request.session['is_login'] = True
-                # request.session['user_id'] = user.id
+                response = redirect('/sim_trade/')
+                request.session['user_id'] = user.id
+                if remember == "on":
+                    response.set_cookie('username', user.username, max_age=7 * 24 * 3600)
+                    response.set_cookie('userid', user.id, max_age=7 * 24 * 3600)
                 # request.POST.session['user_name'] = user.username
-                return redirect('/sim_trade/')
+                return response
             else:
                 message = 'incorrect password'
                 return render(request, 'login/login.html', {'message': message})

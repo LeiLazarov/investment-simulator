@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% block title %}Login{% endblock %}
 {% block content %}
     <div data-overlay class="min-vh-100 bg-light d-flex flex-column justify-content-md-center">
       <section class="py-3">
@@ -26,7 +26,7 @@
                   <div class="form-group">
                     <div class="custom-control custom-checkbox text-small">
                       <input type="checkbox" class="custom-control-input" id="sign-in-remember">
-                      <label class="custom-control-label" for="sign-in-remember">Remember me next time</label>
+                      <label class="custom-control-label" for="sign-in-remember" name="remember">Remember me next time</label>
                     </div>
                   </div>
                   <button class="btn btn-primary btn-block" type="submit">Sign In</button>

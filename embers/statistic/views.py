@@ -1,10 +1,10 @@
 import requests
-from django.shortcuts import render,redirect
+from django.shortcuts import render
 from sim_trade import models
 import json
 from django.http import HttpResponse
 from django.core.serializers import serialize
-from decimal import *
+
 
 # Create your views here.
 
@@ -43,9 +43,6 @@ def follow_post(request):
 
 
 def table(request):
-    uid = request.session.get('user_id', '')
-    if not uid:
-        return redirect("/login/")
     return render(request, 'sim_trade/table.html')
 
 
@@ -63,15 +60,15 @@ def buy_stock(request):
     buy_res = 'Fail'
     if request.POST:
         s_symbol = request.POST['bsym']
-        s_price = Decimal(request.POST['val']).quantize(Decimal('.00'), rounding=ROUND_DOWN)
+        s_price = float(request.POST['val'])
         s_num = int(request.POST['qua'])
-        uid = request.session.get('user_id', '')
+        uid = 1
         try:
             record = models.Owned.objects.filter(userID=uid,stockID=s_symbol)
             if record.exists():
                 element = record.first()
                 num = element.quantity + s_num
-                avg = ((element.quantity*element.avg_price+s_num*s_price)/num).quantize(Decimal('.00'), rounding=ROUND_DOWN)
+                avg = (element.quantity*element.avg_price+s_num*s_price)/num
                 element.quantity = num
                 element.avg_price = avg
                 if s_price>element.max_price:
@@ -91,5 +88,7 @@ def buy_stock(request):
                 )
         except Exception as e:
             buy_res = 'Fail'
-            return redirect("/table/")
-        return redirect("/table/")
+            return render(request, 'sim_trade/table.html', {"buy_res": buy_res})
+
+
+    return render(request, 'sim_trade/table.html', {"buy_res": buy_res})

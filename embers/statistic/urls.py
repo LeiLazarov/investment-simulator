@@ -14,7 +14,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path,re_path
-from django.conf.urls import url
 
 from . import views
 
@@ -24,5 +23,5 @@ urlpatterns = [
     path('table/', views.table, name='table'),
     path('sim_trade/', views.sim_trade, name='sim_trade'),
     re_path(r'sim_trade/getOwned/', views.getOwned, name='getOwned'),
-    url(r'^buy_stock$', views.buy_stock),
+    path('buy_stock', views.buy_stock, name='buy_stock'),
 ]

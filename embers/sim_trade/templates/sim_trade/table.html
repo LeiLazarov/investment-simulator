@@ -7,7 +7,6 @@
     SimTrade
 {% endblock %}
 {% block content %}
-    <link href="{% static 'css/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" media="all"/>
     <section class="pb-0">
         <div class="container">
             <div class="p-0 text-dark rounded bg-white">
@@ -74,11 +73,12 @@
                 </div>
                 <div class="modal-body row">
                     <div class="col-md-6">
-                        <form>
+                        <form action="/buy_stock" method="post">
+                            {% csrf_token %}
                             <div class="form-group row">
                                 <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
                                 <input type="text" id="symbol" class="form-control col-sm-4"
-                                       placeholder="Enter stock symbol">
+                                       name="bsym" placeholder="Enter stock symbol">
                                 <div class="col-sm-4">
                                     <button type="button" onclick="checkStock()" class="btn btn-secondary btn-sm h-100">
                                         Symbol Lookup
@@ -93,7 +93,7 @@
                                 <label for="curP" class="col-sm-3 col-form-label">CURRENT</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="curP"
-                                           value="">
+                                           name="val" value="">
                                 </div>
                                 <label for="highP" class="col-sm-3 col-form-label">DAY'S HIGH</label>
                                 <div class="col-sm-3">
@@ -124,7 +124,7 @@
                             <div class="form-group row">
                                 <label for="quantity" class="col-sm-4 col-form-label">QUANTITY</label>
                                 <input type="number" class="form-control col-sm-4" id="quantity" disabled
-                                       onchange="changeQ()">
+                                       name="qua" onchange="changeQ()">
                             </div>
                             <div class="form-group text-right row">
                                 <div class="col-sm-8">
@@ -132,6 +132,7 @@
                                 </div>
                             </div>
                         </form>
+                        <p>{{ buy_res }}</p>
                     </div>
                     <div class="col-md-6">
                         <table class="w-100">
@@ -206,6 +207,36 @@
         function getLocalTime(nS) {
             return new Date(parseInt(nS) * 1000).toLocaleTimeString();
         }
+
+        $('#ajax_submit').click(function () {
+            $.ajax({
+                url: "/login_ajax.html",
+                //data: {user: $('#u').val(), email: $('#e').val(), pwd: $('#p').val()},
+                data: $('#f1').serialize(),
+                type: 'POST',
+                success: function (arg) {
+
+                    $('.error-msg').remove();
+                    var v1 = JSON.parse(arg);
+                    console.log(v1);
+                    if (!v1.status) {
+                        // var error_obj = JSON.parse(v1.error);
+                        var error_obj = v1.error;
+                        $.each(error_obj, function (k, v) {
+                            // k: user 或 email
+                            // v: [{}{}{},]
+                            var tag = document.createElement('span');
+                            tag.className = 'error-msg';
+                            tag.innerHTML = v[0].message;
+                            $("input[name='" + k + "']").after(tag);
+                        })
+                    } else {
+                        location.href = "/index.html"
+                    }
+                    // { 'stauts': true, 'error':xx, 'data'：’‘}
+                }
+            })
+        })
     </script>
     <script>
         var queryUrl = '/sim_trade/getOwned/'//should use session
@@ -216,7 +247,7 @@
             cache: false,
             sortable: true,
             sortOrder: "asc",
-            search: false,
+            search: true,
             strictSearch: true,
             showColumns: false,
             minimumCountColumns: 2,
