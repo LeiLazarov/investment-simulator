@@ -21,15 +21,20 @@
                 <div class="col-lg-8">
                     {% for stock in my_watchlist %}
                         <div class="mb-3 mb-sm-4">
-                            <a href="#" class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow">
+                            <a href="{% url 'watchlist:watchlist_detail' stock.id %}" class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow">
                                 <div style="width: 100%;">
-                                    <span>{{ stock.symbol}}</span>
-                                    <span style="float: right; margin-left: 12%;">{{ stock.user.username }}</span>
+                                    <span>Stock Code: {{ stock.symbol}}</span>
+{#                                    <span style="float: right; margin-left: 12%;">{{ stock.user.username }}</span>#}
                                     <div style="margin-bottom: 1%; margin-top: 1%">
-                                        <span >${{ stock.stock_quote.c }}</span>
+                                        <span >current price: ${{ stock.stock_quote.c }} per unit</span>
                                     </div>
                                     <p>percentage change</p>
-                                    <p class="card-text">{{ stock.createdAt }}</p>
+                                    <div>
+                                    <p class="card-text" style="float: left">{{ stock.createdAt }}</p>
+                                    <button class="btn btn-primary" type="button" style="float: right">
+                                         Remove
+                                    </button>
+                                    </div>
                                 </div>
                             </a>
                         </div>
