@@ -116,6 +116,9 @@
     border-radius: 1rem;
     box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, 0.05);
     overflow: hidden;
+    min-height: 150px;
+    min-width: 150px;
+    line-height: 138px;
 }
 
 @media only screen and (max-width: 991px) {
@@ -126,8 +129,8 @@
 }
 
 .header_photo-img {
-    height: 100%;
-    width: 100%
+    vertical-align: middle;
+    margin: 0 auto;
 }
 
 .header_contact {

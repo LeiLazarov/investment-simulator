@@ -52,14 +52,22 @@ def getDataFromAPI(symbol):
     result = {'categoryData': [], 'values': [], 'volumes': []}
     for i in range(len(candle['t'])):
         date = datetime.utcfromtimestamp(candle['t'][0]).strftime("%Y/%m/%d")
-        temp = []
-        temp.append(candle['o'][i])
-        temp.append(candle['h'][i])
-        temp.append(candle['l'][i])
-        temp.append(candle['c'][i])
+        values = []
+        values.append(round(candle['o'][i],2))
+        values.append(round(candle['c'][i],2))
+        values.append(round(candle['l'][i],2))
+        values.append(round(candle['h'][i],2))
+        values.append(candle['v'][i])
         result['categoryData'].append(date)
-        result['values'].append(temp)
-        result['volumes'].append(candle['v'][i])
+        result['values'].append(values)
+        volumes = []
+        volumes.append(i)
+        volumes.append(candle['v'][i])
+        if candle['o'][i]>candle['c'][i]:
+            volumes.append(1)
+        else:
+            volumes.append(-1)
+        result['volumes'].append(volumes)
     url = './media/candles/' + symbol + '.json'
     with open(url, 'w') as f:
         json.dump(result, f)

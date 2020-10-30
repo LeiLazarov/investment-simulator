@@ -29,3 +29,9 @@ class Detail(models.Model):
     logo = models.FileField(upload_to='logos/',default='logos/empty.png',storage=fs) # Logo image
     industry = models.CharField(null=False, max_length=32) # Industry classification
     updateAt = models.DateTimeField(auto_now_add=True) # The last update date
+
+class Statistic(models.Model):
+    userID = models.IntegerField(primary_key=True)
+    account = models.DecimalField(max_digits=12,decimal_places=2)
+    cash = models.DecimalField(max_digits=12,decimal_places=2)
+    stockValue = models.FloatField()

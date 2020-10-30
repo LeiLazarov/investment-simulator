@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from login import models
+from stock.models import Statistic
+from decimal import *
 
 def index(request):
     return render(request, 'index.html')
@@ -55,11 +57,19 @@ def registration(request):
                 if same_email:
                     message = 'email has been used!'
                     return render(request, 'login/registration.html', {'message': message})
+                # create user info
                 new_user = models.User()
                 new_user.username = username
                 new_user.password = password_01
                 new_user.email = email
                 new_user.save()
+                # create user account
+                Statistic.objects.create(
+                    userID=new_user.id,
+                    account = Decimal(1000000),
+                    cash =  Decimal(1000000),
+                    stockValue =  Decimal(0)
+                )
                 return redirect('/login/')
     return render(request, 'login/registration.html')
 
