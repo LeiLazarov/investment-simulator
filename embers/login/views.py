@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from login import models
-from stock.models import Statistic
 from decimal import *
 
 def index(request):
@@ -64,8 +63,8 @@ def registration(request):
                 new_user.email = email
                 new_user.save()
                 # create user account
-                Statistic.objects.create(
-                    userID=new_user.id,
+                models.Statistic.objects.create(
+                    user=new_user,
                     account = Decimal(1000000),
                     cash =  Decimal(1000000),
                     stockValue =  Decimal(0)
