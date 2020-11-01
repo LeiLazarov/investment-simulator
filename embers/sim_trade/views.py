@@ -51,11 +51,16 @@ def table(request):
     uid = request.session.get('user_id', '')
     if not uid:
         return redirect("/login/")
+    # statistics part
     stats = refreshStat(uid)
     acc = {'a': "${:,}".format(stats[0]), 'c': "${:,}".format(stats[1])
         , 's': "${:,}".format(stats[2]), 'e': "${:,}".format(stats[3])
         , 'cv':str(stats[1]),'sv':str(stats[2])}
-    return render(request, 'sim_trade/table.html', {'acc': acc})
+
+    # owned stock part
+    owned_list = models.Owned.objects.filter(user_id=uid)
+
+    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
 
 def checkStock(request, offset):
     try:

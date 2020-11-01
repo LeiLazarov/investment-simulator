@@ -67,7 +67,35 @@
                         </button>
                     </div>
                 </div>
-                <table id="ownedStock"></table>
+                <table id="ownedStock" data-toolbar="#toolbar" data-toggle="table" data-search="true">
+                    <thead>
+                    <tr>
+                        <th data-field="sym" data-sortable="true">symbol</th>
+                        <th data-field="val" data-sortable="true">values</th>
+                        <th data-field="num" data-sortable="true">quantity</th>
+                        <th data-field="cur" data-sortable="true">Current price</th>
+                        <th data-field="avg" data-sortable="true">Avg. purchase price</th>
+                        <th data-field="min" data-sortable="true">Min. purchase price</th>
+                        <th data-field="max" data-sortable="true">Max. purchase price</th>
+                        <th data-field="act" data-sortable="true">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in owned_list %}
+                        <tr class="stock-row">
+                            <td><a href='/stock/{{ row.stock.symbol }}' title='View detail'
+                                   target='_blank'>{{ row.stock.symbol }}</a></td>
+                            <td>0</td>
+                            <td>{{ row.quantity }}</td>
+                            <td>{{ row.stock.price }}</td>
+                            <td>{{ row.avg_price }}</td>
+                            <td>{{ row.min_price }}</td>
+                            <td>{{ row.max_price }}</td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -275,7 +303,19 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip()
+            calValues()
+            $('#ownedStock').on('search.bs.table', function (e, text) {
+                calValues()
+            });
         });
+
+        function calValues() {
+            $(".stock-row").each(function () {
+                s_num = parseInt(this.children[2].innerText)
+                s_price = parseFloat(this.children[3].innerText)
+                this.children[1].innerText = (s_num * s_price).toFixed(2)
+            })
+        }
 
         function checkStock() {
             var sym = $("input#symbol").val()
@@ -453,6 +493,8 @@
         }
     </script>
     <script>
+
+        /*
         var queryUrl = '/sim_trade/getOwned/'//should use session
         $('#ownedStock').bootstrapTable({
             url: queryUrl,
@@ -506,7 +548,7 @@
 
         function detailFormatter(value) {
             return "<a href='/stock/" + value + "' title='View detail' target='_blank'>" + value + "</a>";
-        }
+        }*/
     </script>
 
 {% endblock %}
