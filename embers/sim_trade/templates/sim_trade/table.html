@@ -7,17 +7,12 @@
     SimTrade
 {% endblock %}
 {% block content %}
-    <link href="{% static 'css/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" media="all"/>
     <section class="pb-0">
         <div class="container">
             <div class="p-0 text-dark rounded bg-white">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Account</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                data-target="#purchase">
-                            Buy stock
-                        </button>
                         <button type="button" class="btn btn-sm btn-secondary">
                             View record
                         </button>
@@ -30,7 +25,7 @@
                             <a href="#" data-toggle="tooltip" data-placement="top"
                                title="Calculated as: = cash + market value of stocks">
                                 Account Value</a>
-                            <h4 class="mt-2 card-title">$100,000.00</h4>
+                            <h4 class="mt-2 card-title">{{ acc.a }}</h4>
                         </div>
                     </div>
                     <div class="p-2 flex-fill">
@@ -38,7 +33,7 @@
                             <a href="#" data-toggle="tooltip" data-placement="top"
                                title="Total amount of cash available for trading stocks with">
                                 Cash</a>
-                            <h4 class="mt-2 card-title">$100,000.00</h4>
+                            <h4 class="mt-2 card-title">{{ acc.c }}</h4>
                         </div>
                     </div>
                     <div class="p-2 flex-fill">
@@ -46,7 +41,7 @@
                             <a href="#" data-toggle="tooltip" data-placement="top"
                                title="Total market value of stocks">
                                 Stock Value</a>
-                            <h4 class="mt-2 card-title">$0.00</h4>
+                            <h4 class="mt-2 card-title">{{ acc.s }}</h4>
                         </div>
                     </div>
                     <div class="p-2 flex-fill">
@@ -54,13 +49,53 @@
                             <a href="#" data-toggle="tooltip" data-placement="top"
                                title="Calculated as: = starting account value - current account value">
                                 Earning Value</a>
-                            <h4 class="mt-2 card-title">$0.00</h4>
+                            <h4 class="mt-2 card-title">{{ acc.e }}</h4>
                         </div>
                     </div>
                 </div>
 
                 <h2>Owned Stocks</h2>
-                <table id="ownedStock"></table>
+                <div id="toolbar">
+                    <div class="form-inline" role="form">
+                        <button type="button" class="btn btn-sm btn-info     ml-2" data-toggle="modal"
+                                data-target="#purchase">
+                            Buy stock
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning ml-2" data-toggle="modal"
+                                data-stock="" data-target="#sold">
+                            Sell stock
+                        </button>
+                    </div>
+                </div>
+                <table id="ownedStock" data-toolbar="#toolbar" data-toggle="table" data-search="true">
+                    <thead>
+                    <tr>
+                        <th data-field="sym" data-sortable="true">symbol</th>
+                        <th data-field="val" data-sortable="true">values</th>
+                        <th data-field="num" data-sortable="true">quantity</th>
+                        <th data-field="cur" data-sortable="true">Current price</th>
+                        <th data-field="avg" data-sortable="true">Avg. purchase price</th>
+                        <th data-field="min" data-sortable="true">Min. purchase price</th>
+                        <th data-field="max" data-sortable="true">Max. purchase price</th>
+                        <th data-field="act" data-sortable="true">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in owned_list %}
+                        <tr class="stock-row">
+                            <td><a href='/stock/{{ row.stock.symbol }}' title='View detail'
+                                   target='_blank'>{{ row.stock.symbol }}</a></td>
+                            <td>0</td>
+                            <td>{{ row.quantity }}</td>
+                            <td>{{ row.stock.price }}</td>
+                            <td>{{ row.avg_price }}</td>
+                            <td>{{ row.min_price }}</td>
+                            <td>{{ row.max_price }}</td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -75,19 +110,16 @@
                 <div class="modal-body row">
                     <div class="col-md-6">
                         <form>
+                            {% csrf_token %}
                             <div class="form-group row">
                                 <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
                                 <input type="text" id="symbol" class="form-control col-sm-4"
-                                       placeholder="Enter stock symbol">
+                                       name="bsym" placeholder="Enter stock symbol">
                                 <div class="col-sm-4">
                                     <button type="button" onclick="checkStock()" class="btn btn-secondary btn-sm h-100">
                                         Symbol Lookup
                                     </button>
                                 </div>
-                            </div>
-                            <div class="form-group row alert alert-danger d-none" id="checkTip" role="alert"> No data
-                                found, please
-                                check the symbol!
                             </div>
                             <div class="form-group row d-none bg-light" id="stockInfo">
                                 <label for="curP" class="col-sm-3 col-form-label">CURRENT</label>
@@ -121,31 +153,142 @@
                                            value="">
                                 </div>
                             </div>
+                            <div class="form-group row alert alert-danger d-none" id="checkTip" role="alert"> No data
+                                found, please
+                                check the symbol!
+                            </div>
                             <div class="form-group row">
                                 <label for="quantity" class="col-sm-4 col-form-label">QUANTITY</label>
                                 <input type="number" class="form-control col-sm-4" id="quantity" disabled
-                                       onchange="changeQ()">
+                                       name="qua" oninput="inputQ()" onchange="changeQ()">
                             </div>
                             <div class="form-group text-right row">
                                 <div class="col-sm-8">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button id="submit" disabled type="button" onclick="orderSubmit()"
+                                            class="btn btn-primary">
+                                        Submit
+                                    </button>
                                 </div>
                             </div>
                         </form>
+                        <p>{{ buy_res }}</p>
                     </div>
                     <div class="col-md-6">
                         <table class="w-100">
                             <tr>
                                 <td>Account Value</td>
-                                <td>$100,000</td>
+                                <td>{{ acc.a }}</td>
                             </tr>
                             <tr>
                                 <td>Cash</td>
-                                <td id="cashV" data-value="100000">$100,000<span id="chgC"></span></td>
+                                <td id="cashV" data-value="{{ acc.cv }}">{{ acc.c }}<span id="chgC"></span></td>
                             </tr>
                             <tr>
                                 <td>Stock Value</td>
-                                <td id="stockV" data-value="100000">$100,000<span id="chgS"></span></td>
+                                <td id="stockV" data-value="{{ acc.sv }}">{{ acc.s }}<span id="chgS"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sold" data-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">SELL STOCK</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body row">
+                    <div class="col-md-6">
+                        <form>
+                            {% csrf_token %}
+                            <div class="form-group row">
+                                <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
+                                <input type="text" id="sell_symbol" class="form-control col-sm-4"
+                                       name="bsym" placeholder="Enter stock symbol">
+                                <div class="col-sm-4">
+                                    <button type="button" onclick="sellCheckStock()"
+                                            class="btn btn-secondary btn-sm h-100">
+                                        Symbol Lookup
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group row d-none bg-light" id="sell_stockInfo">
+                                <label for="sell_curP" class="col-sm-3 col-form-label">CURRENT</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_curP"
+                                           value="">
+                                </div>
+                                <label for="sell_highP" class="col-sm-3 col-form-label">DAY'S HIGH</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_highP"
+                                           value="">
+                                </div>
+                                <label for="sell_lowP" class="col-sm-3 col-form-label">DAY'S LOW</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_lowP"
+                                           value="">
+                                </div>
+                                <label for="sell_chg" class="col-sm-3 col-form-label">OPEN</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_openP"
+                                           value="">
+                                </div>
+                                <label for="sell_pchg" class="col-sm-3 col-form-label">PREVIOUS CLOSE</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_clsP"
+                                           value="">
+                                </div>
+                                <label for="sell_update" class="col-sm-3 col-form-label">UPDATE</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_update"
+                                           value="">
+                                </div>
+                                <label for="sell_max" class="col-sm-3 col-form-label">HOLDING</label>
+                                <div class="col-sm-6">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_max"
+                                           value="">
+                                </div>
+                            </div>
+                            <div class="form-group row alert alert-danger d-none" id="sell_checkTip" role="alert"> No
+                                data
+                                found, please
+                                check the symbol!
+                            </div>
+                            <div class="form-group row">
+                                <label for="quantity" class="col-sm-4 col-form-label">QUANTITY</label>
+                                <input type="number" class="form-control col-sm-4" id="sell_quantity" disabled
+                                       name="qua" oninput="sellInputQ()" onchange="sellChangeQ()">
+                            </div>
+                            <div class="form-group text-right row">
+                                <div class="col-sm-8">
+                                    <button id="sell_submit" disabled type="button" onclick="sellSubmit()"
+                                            class="btn btn-primary">
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <p>{{ buy_res }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="w-100">
+                            <tr>
+                                <td>Account Value</td>
+                                <td>{{ acc.a }}</td>
+                            </tr>
+                            <tr>
+                                <td>Cash</td>
+                                <td id="sell_cashV" data-value="{{ acc.cv }}">{{ acc.c }}<span id="sell_chgC"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Stock Value</td>
+                                <td id="sell_stockV" data-value="{{ acc.sv }}">{{ acc.s }}<span id="sell_chgS"></span>
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -159,22 +302,34 @@
     <script src="{% static 'js/bootstrap-table.min.js' %}"></script>
     <script>
         $(document).ready(function () {
-            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="tooltip"]').tooltip()
+            calValues()
+            $('#ownedStock').on('search.bs.table', function (e, text) {
+                calValues()
+            });
         });
+
+        function calValues() {
+            $(".stock-row").each(function () {
+                s_num = parseInt(this.children[2].innerText)
+                s_price = parseFloat(this.children[3].innerText)
+                this.children[1].innerText = (s_num * s_price).toFixed(2)
+            })
+        }
 
         function checkStock() {
             var sym = $("input#symbol").val()
             if (sym != null) {
-                var url = 'https://finnhub.io/api/v1/quote?symbol=' + sym + '&token=buch32v48v6t51vholng';
+                var url = 'sim_trade/checkStock/' + sym;
                 $.get(url, function (rawData) {
-                    if (rawData['t'] != 0) {
+                    if (rawData['type'] == 'success') {
                         $("div#checkTip").addClass('d-none');
-                        $("input#curP").val(rawData['c']);
-                        $("input#highP").val(rawData['h']);
-                        $("input#lowP").val(rawData['l']);
-                        $("input#openP").val(rawData['o']);
-                        $("input#clsP").val(rawData['pc']);
-                        $("input#update").val(getLocalTime(rawData['t']));
+                        $("input#curP").val(rawData['price']);
+                        $("input#highP").val(rawData['high']);
+                        $("input#lowP").val(rawData['low']);
+                        $("input#openP").val(rawData['open']);
+                        $("input#clsP").val(rawData['close']);
+                        $("input#update").val(rawData['updateAt']);
                         $("div#stockInfo").removeClass('d-none');
                         $("input#quantity").attr("disabled", false);
                     } else {
@@ -186,37 +341,170 @@
             }
         }
 
-        function changeQ() {
-            var unit = parseFloat($("input#quantity").val());
-            var price = parseFloat($("input#curP").val()).toFixed(2);
-            var cash = parseFloat($("td#cashV").data("value")).toFixed(2);
-            var stock = parseFloat($("td#stockV").data("value")).toFixed(2);
-            if (unit * price > cash) {
-                unit = parseInt(cash / price);
-            }
-            var chgC = parseFloat(cash - unit * price).toFixed(2);
-            var chgS = parseFloat(stock - unit * price).toFixed(2);
-            $("span#chgC").text(" - $" + unit * price + " = $" + chgC);
-            $("span#chgC").css("color", "red");
-            $("span#chgS").text(" + $" + unit * price + " = $" + chgS);
-            $("span#chgS").css("color", "green");
-            $("input#quantity").val(parseInt(unit));
+        function inputQ() {
+            $('#submit').attr("disabled", true);
         }
 
-        function getLocalTime(nS) {
-            return new Date(parseInt(nS) * 1000).toLocaleTimeString();
+        function changeQ() {
+            var unit = parseFloat($("input#quantity").val())
+            if (unit > 0) {
+                var price = parseFloat($("input#curP").val())
+                var cash = parseFloat($("td#cashV").data("value"))
+                var stock = parseFloat($("td#stockV").data("value"))
+                if (unit * price > cash) {
+                    unit = parseInt(cash / price);
+                }
+                var chg = parseFloat(unit * price)
+                var chgC = cash - chg
+                var chgS = stock + chg
+
+                $("span#chgC").text(" - $" + chg.toFixed(2) + " = $" + chgC.toFixed(2));
+                $("span#chgC").css("color", "red");
+                $("span#chgS").text(" + $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
+                $("span#chgS").css("color", "green");
+                $("input#quantity").val(parseInt(unit));
+                $('#submit').attr("disabled", false);
+            } else {
+                $("span#chgC").text('');
+                $("span#chgC").text('');
+            }
+
+        }
+
+        function sellSubmit() {
+            $('#submit').attr("disabled", true);
+            $.ajax({
+                headers: {
+                    'x-csrftoken': $('[name="csrfmiddlewaretoken"]').val(),
+                },
+                url: "/sell_stock",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    "symbol": $('input#sell_symbol').val(),
+                    "price": $('input#sell_curP').val(),
+                    "number": $('input#sell_quantity').val()
+                }),
+                type: 'POST',
+                success: function (res) {
+                    if (res.type == 'success') {
+                        $('#sell_checkTip').removeClass('alert-danger')
+                        $('#sell_checkTip').addClass('alert-success')
+                        $('#sell_checkTip').html('Success!')
+                        $('#sell_checkTip').removeClass('d-none')
+                    } else {
+                        $('#sell_checkTip').html('Fail! Please try again!')
+                        $('#sell_checkTip').removeClass('d-none')
+                    }
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 3000);
+                }
+            })
         }
     </script>
     <script>
+        function sellCheckStock() {
+            var sym = $("input#sell_symbol").val()
+            if (sym != null) {
+                var url = 'sim_trade/sellCheckStock/' + sym;
+                $.get(url, function (rawData) {
+                    if (rawData['type'] == 'error') {
+                        $("div#sell_stockInfo").addClass('d-none');
+                        $("div#sell_checkTip").removeClass('d-none');
+                        $("input#sell_quantity").attr("disabled", true);
+                    } else {
+                        $("div#sell_checkTip").addClass('d-none');
+                        $("input#sell_curP").val(rawData['price']);
+                        $("input#sell_highP").val(rawData['high']);
+                        $("input#sell_lowP").val(rawData['low']);
+                        $("input#sell_openP").val(rawData['open']);
+                        $("input#sell_clsP").val(rawData['close']);
+                        $("input#sell_update").val(rawData['updateAt']);
+                        $("input#sell_max").val(rawData['volume']);
+                        $("div#sell_stockInfo").removeClass('d-none');
+                        $("input#sell_quantity").attr("disabled", false);
+                    }
+                });
+            }
+        }
+
+        function sellInputQ() {
+            $('#sell_submit').attr("disabled", true);
+        }
+
+        function sellChangeQ() {
+            var unit = parseInt($("input#sell_quantity").val())
+            if (unit > 0) {
+                var hold = parseInt($("input#sell_max").val())
+                var price = parseFloat($("input#sell_curP").val())
+                var cash = parseFloat($("td#sell_cashV").data("value"))
+                var stock = parseFloat($("td#sell_stockV").data("value"))
+                if (unit > hold) {
+                    unit = hold;
+                }
+                var chg = parseFloat(unit * price)
+                var chgC = cash + chg
+                var chgS = stock - unit * price
+
+                $("span#sell_chgC").text(" + $" + chg.toFixed(2) + " = $" + chgC.toFixed(2));
+                $("span#sell_chgC").css("color", "green");
+                $("span#sell_chgS").text(" - $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
+                $("span#sell_chgS").css("color", "red");
+                $("input#sell_quantity").val(parseInt(unit));
+                $('#sell_submit').attr("disabled", false);
+            } else {
+                $("span#sell_chgC").text('')
+                $("span#sell_chgS").text('')
+            }
+
+        }
+
+        function orderSubmit() {
+            $('#submit').attr("disabled", true);
+            $.ajax({
+                headers: {
+                    'x-csrftoken': $('[name="csrfmiddlewaretoken"]').val(),
+                },
+                url: "/buy_stock",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    "symbol": $('input#symbol').val(),
+                    "price": $('input#curP').val(),
+                    "number": $('input#quantity').val()
+                }),
+                type: 'POST',
+                success: function (res) {
+                    if (res.type == 'success') {
+                        $('#checkTip').removeClass('alert-danger')
+                        $('#checkTip').addClass('alert-success')
+                        $('#checkTip').html('Success!')
+                        $('#checkTip').removeClass('d-none')
+                    } else {
+                        $('#checkTip').html('Fail! Please try again!')
+                        $('#checkTip').removeClass('d-none')
+                    }
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 3000);
+                }
+            })
+        }
+    </script>
+    <script>
+
+        /*
         var queryUrl = '/sim_trade/getOwned/'//should use session
         $('#ownedStock').bootstrapTable({
             url: queryUrl,
+            toolbar: '#toolbar',
             method: 'GET',
             striped: true,
             cache: false,
             sortable: true,
             sortOrder: "asc",
-            search: false,
+            search: true,
             strictSearch: true,
             showColumns: false,
             minimumCountColumns: 2,
@@ -224,48 +512,43 @@
             showToggle: false,
             cardView: false,
             detailView: false,
-            columns: [{
-                field: 'stockID',
-                title: 'Symbol',
-                sortable: true
-            }, {
-                field: 'quantity',
-                title: 'Quantity',
-                sortable: true
-            }, {
-                field: 'avg_price',
-                title: 'Average purchase price',
-                sortable: true
-            }, {
-                field: 'max_price',
-                title: 'Maximum purchase price',
-                sortable: true
-            }, {
-                field: 'min_price',
-                title: 'Minimum purchase price',
-                sortable: true
-            }, {
-                field: 'ownedID',
-                title: 'Action',
-                width: 120,
-                align: 'center',
-                valign: 'middle',
-                formatter: null,
-            },],
+            columns: [
+                {
+                    field: 'symbol',
+                    title: 'Symbol',
+                    sortable: true,
+                    formatter: detailFormatter,
+                },
+                {
+                    field: 'values',
+                    title: 'Values',
+                    sortable: true,
+                }, {
+                    field: 'quantity',
+                    title: 'Quantity',
+                    sortable: true
+                }, {
+                    field: 'avg_price',
+                    title: 'Average purchase price',
+                    sortable: true
+                }, {
+                    field: 'max_price',
+                    title: 'Maximum purchase price',
+                    sortable: true
+                }, {
+                    field: 'min_price',
+                    title: 'Minimum purchase price',
+                    sortable: true
+                }, ],
             onLoadSuccess: function () {
             },
             onLoadError: function () {
             },
         });
 
-        function actionFormatter(value, row, index) {
-            var id = value;
-            var result = "";
-            result += "<button type='button' class='btn btn-sm btn-secondary'>Stock Detail</button>";
-            result += "<button type='button' class='btn btn-sm btn-secondary'>Buy</button>";
-            result += "<button type='button' class='btn btn-sm btn-secondary'>Sell</button>";
-            return result;
-        }
+        function detailFormatter(value) {
+            return "<a href='/stock/" + value + "' title='View detail' target='_blank'>" + value + "</a>";
+        }*/
     </script>
 
 {% endblock %}
