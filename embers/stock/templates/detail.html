@@ -4,84 +4,103 @@
 {% block title %}
     {{ stock.symbol }}
 {% endblock %}
-
 {% block content %}
-    <link href="{% static 'css/detail.css' %}" rel="stylesheet" type="text/css" media="all"/>
-    <div>
-        <section class="pb-0">
-            <div class="container">
-                <div class="jumbotron p-0 text-dark rounded bg-white">
-                    <div class="row no-gutters border rounded flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                        <header class="header">
-                            <div class="header_left">
-                                <div class="header_photo"><img class="header_photo-img"
-                                                               src="{% if not stock.logo %}{% static 'img/empty.png' %}{% else %}{{ stock.logo }}{% endif %}"
-                                                               alt="{{ stock.cmpname }}">
-                                </div>
-                                <div class="ml-4">
-                                    <h2 class="mb-2">{{ stock.cmpname }}</h2>
-                                    <strong class="d-inline-block text-primary">{{ stock.industry }}</strong>
-                                    <div class="mb-1 text-muted">{{ stock.weburl }}</div>
+    {% if not error %}
 
-                                    <p class="card-text mb-auto">{{ stock.exchange }}</p>
+        <link href="{% static 'css/detail.css' %}" rel="stylesheet" type="text/css" media="all"/>
+        <div>
+            <section class="pb-0">
+                <div class="container">
+                    <div class="jumbotron p-0 text-dark rounded bg-white">
+                        <div class="row no-gutters border rounded flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <header class="header">
+                                <div class="header_left">
+                                    <div class="header_photo"><img class="header_photo-img"
+                                                                   src="
+
+                                                                           {% if not stock.logo %}{% static 'img/empty.png' %}{% else %}{{ stock.logo }}{% endif %}"
+                                                                   alt="{{ stock.cmpname }}">
+                                    </div>
+                                    <div class="ml-4">
+                                        <h2 class="mb-2">{{ stock.cmpname }}</h2>
+                                        <strong class="d-inline-block text-primary">{{ stock.industry }}</strong>
+                                        <div class="mb-1 text-muted">{{ stock.weburl }}</div>
+
+                                        <p class="card-text mb-auto">{{ stock.exchange }}</p>
+                                    </div>
+                                </div>
+                                <div class="header_right">
+                                    <ul class="header_contact">
+                                        <li><span class="overhead">Symbol</span>{{ stock.symbol }}</li>
+                                        <li><span
+                                                class="overhead">Market Capitalization</span>{{ stock.marketCapitalization }}
+                                        </li>
+                                        <li><span class="overhead">IPO</span>{{ stock.ipo|date:"N j, Y" }}</li>
+                                    </ul>
+                                    <ul class="header_contact">
+                                        <li><span
+                                                class="overhead">Currency & Country</span>{{ stock.currency }}, {{ stock.country }}
+                                        </li>
+                                        <li><span class="overhead">Outstanding Share</span>{{ stock.shareOutstanding }}
+                                        </li>
+                                        <li><span class="overhead">Phone</span>{{ stock.phone }}</li>
+                                    </ul>
+                                </div>
+                            </header>
+                            <div class="d-flex w-100 m-3 text-center">
+                                <div class="p-2 flex-fill">
+                                    <div class="numbers">
+                                        <p>Current Price</p>
+                                        <h4 class="mt-2 card-title">{{ price.price|floatformat:2 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="p-2 flex-fill">
+                                    <div class="numbers">
+                                        <p>Day's Open Price</p>
+                                        <h4 class="mt-2 card-title">{{ price.open|floatformat:2 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="p-2 flex-fill">
+                                    <div class="numbers">
+                                        <p>Day's High Price</p>
+                                        <h4 class="mt-2 card-title">{{ price.high|floatformat:2 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="p-2 flex-fill">
+                                    <div class="numbers">
+                                        <p>Day's Low Price</p>
+                                        <h4 class="mt-2 card-title">{{ price.low|floatformat:2 }}</h4>
+                                    </div>
+                                </div>
+                                <div class="p-2 flex-fill">
+                                    <div class="numbers">
+                                        <p>Prvious Close Price</p>
+                                        <h4 class="mt-2 card-title">{{ price.close|floatformat:2 }}</h4>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="header_right">
-                                <ul class="header_contact">
-                                    <li><span class="overhead">Symbol</span>{{ stock.symbol }}</li>
-                                    <li><span
-                                            class="overhead">Market Capitalization</span>{{ stock.marketCapitalization }}
-                                    </li>
-                                    <li><span class="overhead">IPO</span>{{ stock.ipo|date:"N j, Y" }}</li>
-                                </ul>
-                                <ul class="header_contact">
-                                    <li><span
-                                            class="overhead">Currency & Country</span>{{ stock.currency }}, {{ stock.country }}
-                                    </li>
-                                    <li><span class="overhead">Outstanding Share</span>{{ stock.shareOutstanding }}</li>
-                                    <li><span class="overhead">Phone</span>{{ stock.phone }}</li>
-                                </ul>
-                            </div>
-                        </header>
-                        <div class="d-flex w-100 m-3 text-center">
-                            <div class="p-2 flex-fill">
-                                <div class="numbers">
-                                    <p>Current Price</p>
-                                    <h4 class="mt-2 card-title">{{ price.price|floatformat:2 }}</h4>
-                                </div>
-                            </div>
-                            <div class="p-2 flex-fill">
-                                <div class="numbers">
-                                    <p>Day's Open Price</p>
-                                    <h4 class="mt-2 card-title">{{ price.open|floatformat:2 }}</h4>
-                                </div>
-                            </div>
-                            <div class="p-2 flex-fill">
-                                <div class="numbers">
-                                    <p>Day's High Price</p>
-                                    <h4 class="mt-2 card-title">{{ price.high|floatformat:2 }}</h4>
-                                </div>
-                            </div>
-                            <div class="p-2 flex-fill">
-                                <div class="numbers">
-                                    <p>Day's Low Price</p>
-                                    <h4 class="mt-2 card-title">{{ price.low|floatformat:2 }}</h4>
-                                </div>
-                            </div>
-                            <div class="p-2 flex-fill">
-                                <div class="numbers">
-                                    <p>Prvious Close Price</p>
-                                    <h4 class="mt-2 card-title">{{ price.close|floatformat:2 }}</h4>
-                                </div>
-                            </div>
+                            <div id="chartContainer" style="width: 100%;height: 800px;"></div>
                         </div>
-                        <div id="chartContainer" style="width: 100%;height: 800px;"></div>
                     </div>
-                </div>
 
-            </div>
-        </section>
-    </div>
+                </div>
+            </section>
+        </div>
+
+
+    {% else %}
+
+        <div>
+            <section class="pb-0">
+                <div class="container">
+                    <div class="jumbotron p-0 text-dark rounded bg-white min-vh-50">
+                        <h1>Error page!</h1>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    {% endif %}
 
 {% endblock %}
 
