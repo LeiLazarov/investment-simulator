@@ -2,6 +2,7 @@ import requests
 from django.shortcuts import render, redirect
 from stock import models
 from datetime import datetime, timedelta
+from django.utils.timezone import utc
 import json
 import time
 from django.http import Http404
@@ -26,9 +27,9 @@ def getStockQuote(request, symbol):
     if stockFilter.exists(): # local contains
         stockItem = stockFilter.first()
         # if the update time > 10 min, update it from API
-        now = datetime.now()
+        now = datetime.utcnow().replace(tzinfo=utc)
         u_time = stockItem.updateAt
-        if u_time.replace(tzinfo=None) + timedelta(minutes=10) < now:
+        if u_time + timedelta(minutes=10) < now:
             # get data
             quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
 
@@ -40,7 +41,7 @@ def getStockQuote(request, symbol):
             if quote['t'] == 0:  # the api return a null dict
                 return stockItem
 
-            if quote['t'] == stockItem.updateAt: # no need to update
+            if quote['t'] == int(time.mktime(stockItem.updateAt.timetuple())): # no need to update
                 return stockItem
 
             stockItem.price=quote['c']
@@ -48,7 +49,7 @@ def getStockQuote(request, symbol):
             stockItem.close=quote['pc']
             stockItem.high=quote['h']
             stockItem.low=quote['l']
-            stockItem.updateAt = datetime.fromtimestamp(int(quote['t']))
+            stockItem.updateAt = datetime.fromtimestamp(int(quote['t'])).replace(tzinfo=None)
             stockItem.save()
 
         return stockItem
@@ -71,7 +72,7 @@ def getStockQuote(request, symbol):
             close=float(quote['pc']),
             high=float(quote['h']),
             low=float(quote['l']),
-            updateAt=datetime.fromtimestamp(int(quote['t']))
+            updateAt=datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
         )
         return stockItem
 
@@ -102,7 +103,7 @@ def getStockDetail(request,symbol):
         # convert candle structure to chart form
         result = {'categoryData': [], 'values': [], 'volumes': []}
         for i in range(len(candle['t'])):
-            date = datetime.utcfromtimestamp(candle['t'][0]).strftime("%Y/%m/%d")
+            date = datetime.utcfromtimestamp(candle['t'][i]).strftime("%Y/%m/%d")
             values = []
             values.append(round(candle['o'][i], 2))
             values.append(round(candle['c'][i], 2))
