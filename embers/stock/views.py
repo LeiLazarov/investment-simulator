@@ -12,7 +12,7 @@ def stock(request, offset):
         stockItem = getStockQuote(request, offset)
         detailItem = getStockDetail(request, offset)
     except Exception as e:
-        return Http404('Cannot found stock!') # should design a error page
+        return render(request, 'detail.html', {'error':True})
 
     return render(request, 'detail.html', {"stock": detailItem, 'price': stockItem})
 
@@ -37,7 +37,7 @@ def getStockQuote(request, symbol):
 
             quote = json.loads(quote.text)  # convert data from json to dict
 
-            if quote['t'] == '0':  # the api return a null dict
+            if quote['t'] == 0:  # the api return a null dict
                 return stockItem
 
             if quote['t'] == stockItem.updateAt: # no need to update
@@ -57,12 +57,12 @@ def getStockQuote(request, symbol):
         quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
 
         if quote.status_code != 200: # fail to get data
-            return False
+            raise Exception
 
         quote = json.loads(quote.text) # convert data from json to dict
 
-        if quote['t'] == '0': # the api return a null dict
-            return False
+        if quote['t'] == 0: # the api return a null dict
+            raise Exception
         # store it to the local
         stockItem = models.Stock.objects.create(
             symbol=symbol,
@@ -87,7 +87,7 @@ def getStockDetail(request,symbol):
         info = requests.get('https://finnhub.io/api/v1/stock/profile2?symbol=' + symbol + '&token=' + token)
 
         if info.status_code != 200:
-            return False
+            raise Exception
         # convert company info from json to dict
         info = json.loads(info.text)
         # get the candle json file
@@ -96,7 +96,7 @@ def getStockDetail(request,symbol):
         candle = requests.get('https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,lastTime,nowTime,token))
 
         if candle.status_code != 200:
-            return False
+            raise Exception
         # convert candle from json to dict
         candle = json.loads(candle.text)
         # convert candle structure to chart form

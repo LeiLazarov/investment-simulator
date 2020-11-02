@@ -62,13 +62,6 @@ def registration(request):
                 new_user.password = password_01
                 new_user.email = email
                 new_user.save()
-                # create user account
-                models.Statistic.objects.create(
-                    user=new_user,
-                    account = Decimal(1000000),
-                    cash =  Decimal(1000000),
-                    stockValue =  Decimal(0)
-                )
                 return redirect('/login/')
     return render(request, 'login/registration.html')
 
