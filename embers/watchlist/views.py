@@ -23,8 +23,7 @@ def watchlist(request):
         stock_quote = requests.get(
             'https://finnhub.io/api/v1/quote?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug')
         company_info = requests.get(
-            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug'
-        )
+            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug')
         stock.stock_quote = stock_quote.json()
         stock.company_info = company_info.json()
         # print(stock.stock_quote)
@@ -35,16 +34,14 @@ def watchlist(request):
     return render(request, 'watchlist/watchlist.html', {'my_watchlist': page_watchlist})
 
 
+def watchlist_detail(request, id):
+    print(id)
+    stock_detail = WatchList.objects.get(pk=id)
+    stock_quote = requests.get(
+        'https://finnhub.io/api/v1/quote?symbol=' + stock_detail.symbol + '&token=buajtbf48v6ocn3pc8ug')
+    company_info = requests.get(
+        'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock_detail.symbol + '&token=buajtbf48v6ocn3pc8ug')
+    stock_detail.stock_quote = stock_quote.json()
+    stock_detail.company_info = company_info.json()
 
-# def reviews(request):
-#     review_list = Review.objects.all()
-#     page_number = request.GET.get('page', 1)
-#     paginator = Paginator(review_list, 2)
-#     try:
-#         page_reviews = paginator.page(page_number)
-#     except PageNotAnInteger:
-#         page_reviews = paginator.page(1)
-#     except EmptyPage:
-#         page_reviews = paginator.page(paginator.num_pages)
-#
-#     return render(request, 'reviews.html', {'page_reviews': page_reviews})
+    return render(request, 'watchlist/watchlist_detail.html', {'stock_detail': stock_detail})

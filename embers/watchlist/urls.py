@@ -21,4 +21,5 @@ app_name = 'watchlist'
 
 urlpatterns = [
     path('watchlist/', views.watchlist, name='watchlist'),
+    path('watchlist/detail/<int:id>/', views.watchlist_detail, name='watchlist_detail'),
 ]

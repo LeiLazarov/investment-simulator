@@ -1,3 +1,5 @@
+import os
+
 import requests
 from django.shortcuts import render, redirect
 from stock import models
@@ -6,6 +8,9 @@ from django.utils.timezone import utc
 import json
 import time
 from django.http import Http404
+
+from embers import settings
+
 
 def stock(request, offset):
     try:
@@ -95,7 +100,6 @@ def getStockDetail(request,symbol):
         nowTime = int(time.time())
         lastTime = nowTime - 31622400
         candle = requests.get('https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,lastTime,nowTime,token))
-
         if candle.status_code != 200:
             raise Exception
         # convert candle from json to dict
@@ -121,8 +125,9 @@ def getStockDetail(request,symbol):
                 volumes.append(-1)
             result['volumes'].append(volumes)
         # store canverted json file
-        url = './media/candles/' + symbol + '.json'
-        with open(url, 'w') as f:
+        url = '\candles\\' + symbol + '.json'
+        path = settings.MEDIA_ROOT + url
+        with open(path, 'w') as f:
             json.dump(result, f)
         # store company info to local
         stock = models.Stock.objects.get(symbol=symbol)
