@@ -112,16 +112,25 @@
                         <form>
                             {% csrf_token %}
                             <div class="form-group row">
-                                <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
-                                <input type="text" id="symbol" class="form-control col-sm-4"
-                                       name="bsym" placeholder="Enter stock symbol">
-                                <div class="col-sm-4">
-                                    <button type="button" onclick="checkStock()" class="btn btn-secondary btn-sm h-100">
-                                        Symbol Lookup
-                                    </button>
+                                <div class="input-group mb-3">
+                                    <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
+                                    <input id="symbol" type="text" class="form-control" placeholder="Enter stock symbol"
+                                           aria-label="Stock symbol" aria-describedby="button-addon1"
+                                           onchange="chgSym()">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-primary" onclick="checkStock()" type="button"
+                                                id="button-addon1">
+                                            Check
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group row d-none bg-light" id="stockInfo">
+                                <label for="sname" class="col-sm-3 col-form-label">COMPANY</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext" id="sname"
+                                           value="">
+                                </div>
                                 <label for="curP" class="col-sm-3 col-form-label">CURRENT</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="curP"
@@ -206,17 +215,23 @@
                         <form>
                             {% csrf_token %}
                             <div class="form-group row">
-                                <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
-                                <input type="text" id="sell_symbol" class="form-control col-sm-4"
-                                       name="bsym" placeholder="Enter stock symbol">
-                                <div class="col-sm-4">
-                                    <button type="button" onclick="sellCheckStock()"
-                                            class="btn btn-secondary btn-sm h-100">
-                                        Symbol Lookup
-                                    </button>
+                                <div class="input-group">
+                                    <label for="symbol" class="col-sm-4 col-form-label">STOCK SYMBOL</label>
+                                    <select class="custom-select" id="stockSelect"
+                                            aria-label="Select a stock" onchange="chgSym2()">
+                                        <option selected value="">Choose...</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button id="button-addon2" class="btn btn-outline-primary" onclick="sellCheckStock()" type="button">Check</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group row d-none bg-light" id="sell_stockInfo">
+                                <label for="sell_name" class="col-sm-3 col-form-label">COMPANY</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_name"
+                                           value="">
+                                </div>
                                 <label for="sell_curP" class="col-sm-3 col-form-label">CURRENT</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="sell_curP"
@@ -307,6 +322,15 @@
             $('#ownedStock').on('search.bs.table', function (e, text) {
                 calValues()
             });
+            $('#sold').on('show.bs.modal', function () {
+
+                $(".stock-row").each(function () {
+                    s_sym = this.children[0].innerText
+                    var opt = "<option value='"+s_sym+"'>"+s_sym+"</option>"
+                    $("#stockSelect").append(opt);
+                })
+
+            })
         });
 
         function calValues() {
@@ -317,13 +341,22 @@
             })
         }
 
+        function chgSym() {
+            $("#button-addon1").attr("disabled", false);
+        }
+
+        function chgSym2() {
+            $("#button-addon2").attr("disabled", false);
+        }
+
         function checkStock() {
             var sym = $("input#symbol").val()
-            if (sym != null) {
+            if (sym != "") {
                 var url = 'sim_trade/checkStock/' + sym;
                 $.get(url, function (rawData) {
                     if (rawData['type'] == 'success') {
                         $("div#checkTip").addClass('d-none');
+                        $("input#sname").val(rawData['name']);
                         $("input#curP").val(rawData['price']);
                         $("input#highP").val(rawData['high']);
                         $("input#lowP").val(rawData['low']);
@@ -332,6 +365,7 @@
                         $("input#update").val(rawData['updateAt']);
                         $("div#stockInfo").removeClass('d-none');
                         $("input#quantity").attr("disabled", false);
+                        $("#button-addon1").attr("disabled", true);
                     } else {
                         $("div#stockInfo").addClass('d-none');
                         $("div#checkTip").removeClass('d-none');
@@ -364,98 +398,10 @@
                 $("span#chgS").css("color", "green");
                 $("input#quantity").val(parseInt(unit));
                 $('#submit').attr("disabled", false);
+                $()
             } else {
                 $("span#chgC").text('');
                 $("span#chgC").text('');
-            }
-
-        }
-
-        function sellSubmit() {
-            $('#submit').attr("disabled", true);
-            $.ajax({
-                headers: {
-                    'x-csrftoken': $('[name="csrfmiddlewaretoken"]').val(),
-                },
-                url: "/sell_stock",
-                contentType: "application/json",
-                dataType: "json",
-                data: JSON.stringify({
-                    "symbol": $('input#sell_symbol').val(),
-                    "price": $('input#sell_curP').val(),
-                    "number": $('input#sell_quantity').val()
-                }),
-                type: 'POST',
-                success: function (res) {
-                    if (res.type == 'success') {
-                        $('#sell_checkTip').removeClass('alert-danger')
-                        $('#sell_checkTip').addClass('alert-success')
-                        $('#sell_checkTip').html('Success!')
-                        $('#sell_checkTip').removeClass('d-none')
-                    } else {
-                        $('#sell_checkTip').html('Fail! Please try again!')
-                        $('#sell_checkTip').removeClass('d-none')
-                    }
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 3000);
-                }
-            })
-        }
-    </script>
-    <script>
-        function sellCheckStock() {
-            var sym = $("input#sell_symbol").val()
-            if (sym != null) {
-                var url = 'sim_trade/sellCheckStock/' + sym;
-                $.get(url, function (rawData) {
-                    if (rawData['type'] == 'error') {
-                        $("div#sell_stockInfo").addClass('d-none');
-                        $("div#sell_checkTip").removeClass('d-none');
-                        $("input#sell_quantity").attr("disabled", true);
-                    } else {
-                        $("div#sell_checkTip").addClass('d-none');
-                        $("input#sell_curP").val(rawData['price']);
-                        $("input#sell_highP").val(rawData['high']);
-                        $("input#sell_lowP").val(rawData['low']);
-                        $("input#sell_openP").val(rawData['open']);
-                        $("input#sell_clsP").val(rawData['close']);
-                        $("input#sell_update").val(rawData['updateAt']);
-                        $("input#sell_max").val(rawData['volume']);
-                        $("div#sell_stockInfo").removeClass('d-none');
-                        $("input#sell_quantity").attr("disabled", false);
-                    }
-                });
-            }
-        }
-
-        function sellInputQ() {
-            $('#sell_submit').attr("disabled", true);
-        }
-
-        function sellChangeQ() {
-            var unit = parseInt($("input#sell_quantity").val())
-            if (unit > 0) {
-                var hold = parseInt($("input#sell_max").val())
-                var price = parseFloat($("input#sell_curP").val())
-                var cash = parseFloat($("td#sell_cashV").data("value"))
-                var stock = parseFloat($("td#sell_stockV").data("value"))
-                if (unit > hold) {
-                    unit = hold;
-                }
-                var chg = parseFloat(unit * price)
-                var chgC = cash + chg
-                var chgS = stock - unit * price
-
-                $("span#sell_chgC").text(" + $" + chg.toFixed(2) + " = $" + chgC.toFixed(2));
-                $("span#sell_chgC").css("color", "green");
-                $("span#sell_chgS").text(" - $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
-                $("span#sell_chgS").css("color", "red");
-                $("input#sell_quantity").val(parseInt(unit));
-                $('#sell_submit').attr("disabled", false);
-            } else {
-                $("span#sell_chgC").text('')
-                $("span#sell_chgS").text('')
             }
 
         }
@@ -493,62 +439,95 @@
         }
     </script>
     <script>
+        function sellCheckStock() {
+            var sym = $("#stockSelect").val()
+            if (sym != "") {
+                var url = 'sim_trade/sellCheckStock/' + sym;
+                $.get(url, function (rawData) {
+                    if (rawData['type'] == 'error') {
+                        $("div#sell_stockInfo").addClass('d-none');
+                        $("div#sell_checkTip").removeClass('d-none');
+                        $("input#sell_quantity").attr("disabled", true);
+                    } else {
+                        $("div#sell_checkTip").addClass('d-none');
+                        $("input#sell_name").val(rawData['name']);
+                        $("input#sell_curP").val(rawData['price']);
+                        $("input#sell_highP").val(rawData['high']);
+                        $("input#sell_lowP").val(rawData['low']);
+                        $("input#sell_openP").val(rawData['open']);
+                        $("input#sell_clsP").val(rawData['close']);
+                        $("input#sell_update").val(rawData['updateAt']);
+                        $("input#sell_max").val(rawData['volume']);
+                        $("div#sell_stockInfo").removeClass('d-none');
+                        $("input#sell_quantity").attr("disabled", false);
+                        $("#button-addon2").attr("disabled", true);
+                    }
+                });
+            }
+        }
 
-        /*
-        var queryUrl = '/sim_trade/getOwned/'//should use session
-        $('#ownedStock').bootstrapTable({
-            url: queryUrl,
-            toolbar: '#toolbar',
-            method: 'GET',
-            striped: true,
-            cache: false,
-            sortable: true,
-            sortOrder: "asc",
-            search: true,
-            strictSearch: true,
-            showColumns: false,
-            minimumCountColumns: 2,
-            uniqueId: "stockID",
-            showToggle: false,
-            cardView: false,
-            detailView: false,
-            columns: [
-                {
-                    field: 'symbol',
-                    title: 'Symbol',
-                    sortable: true,
-                    formatter: detailFormatter,
+        function sellInputQ() {
+            $('#sell_submit').attr("disabled", true);
+        }
+
+        function sellChangeQ() {
+            var unit = parseInt($("input#sell_quantity").val())
+            if (unit > 0) {
+                var hold = parseInt($("input#sell_max").val())
+                var price = parseFloat($("input#sell_curP").val())
+                var cash = parseFloat($("td#sell_cashV").data("value"))
+                var stock = parseFloat($("td#sell_stockV").data("value"))
+                if (unit > hold) {
+                    unit = hold;
+                }
+                var chg = parseFloat(unit * price)
+                var chgC = cash + chg
+                var chgS = stock - unit * price
+
+                $("span#sell_chgC").text(" + $" + chg.toFixed(2) + " = $" + chgC.toFixed(2));
+                $("span#sell_chgC").css("color", "green");
+                $("span#sell_chgS").text(" - $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
+                $("span#sell_chgS").css("color", "red");
+                $("input#sell_quantity").val(parseInt(unit));
+                $('#sell_submit').attr("disabled", false);
+            } else {
+                $("span#sell_chgC").text('')
+                $("span#sell_chgS").text('')
+            }
+
+        }
+
+        function sellSubmit() {
+            $('#submit').attr("disabled", true);
+            $.ajax({
+                headers: {
+                    'x-csrftoken': $('[name="csrfmiddlewaretoken"]').val(),
                 },
-                {
-                    field: 'values',
-                    title: 'Values',
-                    sortable: true,
-                }, {
-                    field: 'quantity',
-                    title: 'Quantity',
-                    sortable: true
-                }, {
-                    field: 'avg_price',
-                    title: 'Average purchase price',
-                    sortable: true
-                }, {
-                    field: 'max_price',
-                    title: 'Maximum purchase price',
-                    sortable: true
-                }, {
-                    field: 'min_price',
-                    title: 'Minimum purchase price',
-                    sortable: true
-                }, ],
-            onLoadSuccess: function () {
-            },
-            onLoadError: function () {
-            },
-        });
-
-        function detailFormatter(value) {
-            return "<a href='/stock/" + value + "' title='View detail' target='_blank'>" + value + "</a>";
-        }*/
+                url: "/sell_stock",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify({
+                    "symbol": $("#stockSelect").val(),
+                    "price": $('input#sell_curP').val(),
+                    "number": $('input#sell_quantity').val()
+                }),
+                type: 'POST',
+                success: function (res) {
+                    if (res.type == 'success') {
+                        $('#sell_checkTip').removeClass('alert-danger')
+                        $('#sell_checkTip').addClass('alert-success')
+                        $('#sell_checkTip').html('Success!')
+                        $('#sell_checkTip').removeClass('d-none')
+                    } else {
+                        $('#sell_checkTip').html('Fail! Please try again!')
+                        $('#sell_checkTip').removeClass('d-none')
+                    }
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 3000);
+                }
+            })
+        }
     </script>
 
 {% endblock %}

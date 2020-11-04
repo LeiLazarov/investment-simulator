@@ -67,6 +67,7 @@ def checkStock(request, offset):
         stockItem = getStockQuote(request, offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
+            res['name']=stockItem.detail.cmpname
             res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
@@ -81,6 +82,7 @@ def sellCheckStock(request, offset):
             ownStock = models.Owned.objects.get(user_id=uid,stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
+            res['name'] = stockItem.detail.cmpname
             res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
