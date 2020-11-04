@@ -42,60 +42,78 @@
 
 
 <!--Yiren 的 sim_trade/stock 在下面-->
+<!--<script>-->
+<!--    $(document).ready(function () {-->
+<!--            $('[data-toggle="tooltip"]').tooltip();-->
+<!--        });-->
+<!--        -->
+<!--    function follow_stock(){-->
+<!--      var symbol = {{ company_info.ticker }};-->
+<!--    }-->
+<!--</script>-->
 
-    <section class="bg-primary-3 text-white" id="exist_stock">
-      <div class="container">
-        <div class="row section-title justify-content-center text-center">
-          <div class="col-md-9 col-lg-8 col-xl-7">
-            <h2 class="display-3">The stock you search:</h2>
+
+<section class="bg-primary-3 text-white" id="exist_stock">
+  <div class="container">
+    <div class="row section-title justify-content-center text-center">
+      <div class="col-md-9 col-lg-8 col-xl-7">
+        <h2 class="display-3">The stock you search:</h2>
+      </div>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-xl-5 col-lg-9 col-md-10 mb-3 mb-sm-5" data-aos="fade-up" data-offset="200">
+        <div class="card card-body hover-box-shadow bg-white">
+          <div>
+            <h5 class="text-muted mb-3" style="float: right">CODE: {{ company_info.ticker }}</h5>
           </div>
-        </div>
+          <img src="{{ company_info.logo }}" alt="Joshua Lapinsky profile image" class="avatar mt-md-n5 mb-3">
 
-        <div class="row justify-content-center">
-          <div class="col-xl-5 col-lg-9 col-md-10 mb-3 mb-sm-5" data-aos="fade-up" data-offset="200">
-            <div class="card card-body hover-box-shadow bg-white">
-              <div>
-                <h5 class="text-muted mb-3" style="float: right">CODE: {{ company_info.ticker }}</h5>
-              </div>
-              <img src="{{ company_info.logo }}" alt="Joshua Lapinsky profile image" class="avatar mt-md-n5 mb-3">
+          <div>
+            <a href="{{ company_info.weburl }}" class="card-link">
+              <h3 class="h3">{{ company_info.name}}</h3>
+            </a>
+            <h5>current price: ${{ stock.c }}</h5>
+            <h5>price in the previous day: ${{ stock.pc }}</h5>
+            <h5>low price today: ${{ stock.l }}</h5>
+            <h5>high price today: ${{ stock.h }}</h5>
 
-              <div>
-                <a href="{{ company_info.weburl }}" class="card-link">
-                  <h3 class="h3">{{ company_info.name}}</h3>
-                </a>
-                <h5>current price: ${{ stock.c }}</h5>
-                <h5>price in the previous day: ${{ stock.pc }}</h5>
-                <h5>low price today: ${{ stock.l }}</h5>
-                <h5>high price today: ${{ stock.h }}</h5>
-
-                <div class="accordion" id="more_about_stock">
-                  <button class="btn btn-link" type="button" data-toggle="collapse"
-                          data-target="#collapse_more_about" aria-expanded="false" aria-controls="collapse_more_about">
-                    Check more
-                  </button>
-                </div>
-
-                <div id="collapse_more_about" class="collapse" aria-labelledby="more_about_stock">
-                    <p>Country: {{ company_info.country }}</p>
-                    <p>Currency: {{ company_info.currency }}</p>
-                    <p>Exchange: {{ company_info.exchange }}</p>
-                    <p>Industry: {{ company_info.finnhubIndustry }}</p>
-                    <p>Share: ${{ company_info.shareOutstanding }}</p>
-                    <p>IPO date: {{ company_info.ipo }}</p>
-                    <p>Phone: {{ company_info.phone }}</p>
-                    <p>Website: {{ company_info.weburl }}</p>
-                </div>
-
-                <div class="card-body text-center">
-                  <a href="#" class="btn btn-primary card-link">Follow</a>
-                </div>
-
-              </div>
+            <div class="accordion" id="more_about_stock">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      data-target="#collapse_more_about" aria-expanded="false" aria-controls="collapse_more_about">
+                Check more
+              </button>
             </div>
+
+            <div id="collapse_more_about" class="collapse" aria-labelledby="more_about_stock">
+                <p>Country: {{ company_info.country }}</p>
+                <p>Currency: {{ company_info.currency }}</p>
+                <p>Exchange: {{ company_info.exchange }}</p>
+                <p>Industry: {{ company_info.finnhubIndustry }}</p>
+                <p>Share: ${{ company_info.shareOutstanding }}</p>
+                <p>IPO date: {{ company_info.ipo }}</p>
+                <p>Phone: {{ company_info.phone }}</p>
+                <p>Website: {{ company_info.weburl }}</p>
+            </div>
+
+<!--                <div class="card-body text-center">-->
+<!--&lt;!&ndash;                    <form action="{% url 'sim_trade:post_follow' company_info.ticker %}" method="post">&ndash;&gt;-->
+<!--                        {% csrf_token %}-->
+<!--                        <button type="submit" class="btn btn-primary" data-toggle="button">Follow</button>-->
+<!--&lt;!&ndash;                    </form>&ndash;&gt;-->
+<!--                </div>-->
+
           </div>
-        </div>
         </div>
       </div>
+    </div>
 
-    </section>
+<!--        <div class="row justify-content-center">-->
+<!--          <button href="sim_trade/sim_trade.html" class="btn btn-primary btn-lg">Go back</button>-->
+<!--        </div>-->
+
+
+  </div>
+
+</section>
 {% endblock %}
