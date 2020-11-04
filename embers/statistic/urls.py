@@ -21,4 +21,6 @@ app_name = 'statistic'
 
 urlpatterns = [
     path('table/', views.table, name='table'),
+    path('record/', views.account_record, name='record'),
+    path('analysis/', views.analysis, name='analysis'),
 ]

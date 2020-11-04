@@ -1,0 +1,64 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    Record
+{% endblock %}
+
+
+{% block content %}
+<link href="{% static 'css/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" media="all"/>
+
+     <section class="pb-0">
+        <div class="container">
+            <div class="p-0 text-dark rounded bg-white">
+            <a href="http://127.0.0.1/analysis" class="btn btn-primary " style="float: right">analysis</a>
+               
+                <h1 class="h2">Record</h1>   
+                <table id="table" 
+                    data-toolbar="#toolbar" 
+                    data-toggle="table" 
+                    data-pagination="true">
+                    <thead>
+                        <tr>
+                            <th data-field="id" data-align=”center” data-sortable="true">recordID</th>
+                            <th data-field="stockname" data-align=”center” data-sortable="true">stocksymbol</th>
+                            <th data-field="quantity" data-align=”center” data-sortable="true"> quantity</th>
+                            <th data-field="price" data-align=”center” data-sortable="true">price</th>
+                            <th data-field="stock_value" data-align=”center” data-sortable="true">stockvalue</th>
+                            <th data-field="type" data-align=”center” data-sortable="true">action</th>
+                            <th data-field="createdAt" data-align=”center” data-sortable="true">createdAt</th>
+                        </tr>
+                    </thead>   
+                    <tbody>
+                        {% for row in record %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.stockname }}</td>
+                                <td>{{ row.quantity }}</td>
+                                <td>{{ row.price }}</td>
+                                <td>{{ row.stock_value }}</td>
+                                <td>{{ row.type }}</td>      
+                                <td>{{ row.createdAt }}</td>
+                            
+                            </tr>
+                        {% endfor %}
+                    </tbody>              
+                </table>
+             
+            </div>
+    
+        </div>
+        
+    </section>
+
+
+      
+{% endblock %}
+
+
+{% block script_content %}
+
+<script src="{% static 'js/bootstrap-table.min.js' %}"></script>
+{% endblock %}

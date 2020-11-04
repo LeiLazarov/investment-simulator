@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'tutorial',
     'sim_trade',
     'watchlist',
+    'statistic',
     'stock', # app for showing stock detail
 ]
 
