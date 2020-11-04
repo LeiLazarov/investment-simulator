@@ -1,8 +1,9 @@
 import requests
 from django.shortcuts import render, redirect
-from sim_trade import models
+from django.db import models
 from stock.models import Stock
 from login.models import User
+from watchlist.models import WatchList
 import json
 from django.http import HttpResponse
 from django.core.serializers import serialize
@@ -17,7 +18,8 @@ import datetime
 
 def sim_trade(request):
     if request.method == 'GET':
-        return render(request, 'sim_trade/sim_trade.html')
+        not_found_msg = None
+        return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
 
     elif request.method == 'POST':
         stock_code = request.POST.get('stock_code').upper()
@@ -33,18 +35,28 @@ def sim_trade(request):
         # print(company_info.json())
 
         if len(company_info.json()) == 0:
-            found_stock_flag = 0
-            return render(request, 'sim_trade/not_found_stock.html')
+            not_found_msg = "Not found stock!"
+            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
+
+    return render(request, 'sim_trade/stock.html', {'stock': stock_quote.json(), 'company_info': company_info.json()})
+
+
+def post_follow(request, sym):
+    # print(sym)
+    # 通过stock.html里的“Follow”按钮拿到了company_info.ticker, 通过url传递过来
+    if request.method == 'POST':
+        if WatchList.objects.filter(symbol=sym, user=1):
+            # 该symbol已经被此用户follow，执行“提示”
+            # models.WatchList.objects.filter(user=1, symbol=sym).delete()
+            return HttpResponse("already  in your list")# 为什么already和in之间有两个空格才显示一个空格
         else:
-            found_stock_flag = 1
+            # 该symbol未被此用户follow，执行“添加”
+            item_id = User.objects.get(id=1)# WatchList.user是来自User.id的外键，要先实例化外键database
+            WatchList(symbol=sym, user=item_id).save()# 再把外键作为WatchList的键，进行添加save
+            return HttpResponse("successfully  followed")
 
-        return render(request, 'sim_trade/stock.html',
-                      {'stock': stock_quote.json(), 'company_info': company_info.json(),
-                       'found_stock_flag': found_stock_flag})
-
-
-def follow_post(request):
-    return render(request)
+    else:
+        raise Exception
 
 
 def table(request):
@@ -62,6 +74,7 @@ def table(request):
 
     return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
 
+
 def checkStock(request, offset):
     try:
         stockItem = getStockQuote(request, offset.upper())
@@ -73,6 +86,7 @@ def checkStock(request, offset):
     except Exception as e:
         return HttpResponse({'type':'error'}, content_type="application/json")
     return HttpResponse({'type':'error'}, content_type="application/json")
+
 
 def sellCheckStock(request, offset):
     uid = request.session.get('user_id', '')
@@ -88,7 +102,6 @@ def sellCheckStock(request, offset):
     except Exception as e:
         return HttpResponse({'type':'error'}, content_type="application/json")
     return HttpResponse({'type':'error'}, content_type="application/json")
-
 
 
 def getOwned(request):

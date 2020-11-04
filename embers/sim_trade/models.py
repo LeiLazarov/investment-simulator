@@ -1,4 +1,5 @@
 from django.db import models
+# from watchlist.models import WatchList
 
 class Owned(models.Model):
     id = models.AutoField(primary_key=True)
