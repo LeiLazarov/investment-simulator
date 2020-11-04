@@ -70,14 +70,14 @@
                 <table id="ownedStock" data-toolbar="#toolbar" data-toggle="table" data-search="true">
                     <thead>
                     <tr>
-                        <th data-field="sym" data-sortable="true">symbol</th>
-                        <th data-field="val" data-sortable="true">values</th>
-                        <th data-field="num" data-sortable="true">quantity</th>
+                        <th data-field="sym" data-sortable="true">Symbol</th>
+                        <th data-field="val" data-sortable="true" data-formatter="eFormatter">Earnings</th>
+                        <th data-field="num" data-sortable="true">Quantity</th>
                         <th data-field="cur" data-sortable="true">Current price</th>
+                        <th data-field="pay" data-sortable="true" data-formatter="pFormatter">Total paid</th>
                         <th data-field="avg" data-sortable="true">Avg. purchase price</th>
-                        <th data-field="min" data-sortable="true">Min. purchase price</th>
-                        <th data-field="max" data-sortable="true">Max. purchase price</th>
-                        <th data-field="act" data-sortable="true">Action</th>
+                        <th data-field="min" data-sortable="true">Min.</th>
+                        <th data-field="max" data-sortable="true">Max.</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -85,13 +85,13 @@
                         <tr class="stock-row">
                             <td><a href='/stock/{{ row.stock.symbol }}' title='View detail'
                                    target='_blank'>{{ row.stock.symbol }}</a></td>
-                            <td>0</td>
+                            <td>{{ row.id }}</td>
                             <td>{{ row.quantity }}</td>
                             <td>{{ row.stock.price }}</td>
+                            <td>{{ row.id }}</td>
                             <td>{{ row.avg_price }}</td>
                             <td>{{ row.min_price }}</td>
                             <td>{{ row.max_price }}</td>
-                            <td></td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -222,7 +222,9 @@
                                         <option selected value="">Choose...</option>
                                     </select>
                                     <div class="input-group-append">
-                                        <button id="button-addon2" class="btn btn-outline-primary" onclick="sellCheckStock()" type="button">Check</button>
+                                        <button id="button-addon2" class="btn btn-outline-primary"
+                                                onclick="sellCheckStock()" type="button">Check
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -318,27 +320,30 @@
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip()
-            calValues()
-            $('#ownedStock').on('search.bs.table', function (e, text) {
-                calValues()
-            });
             $('#sold').on('show.bs.modal', function () {
 
                 $(".stock-row").each(function () {
                     s_sym = this.children[0].innerText
-                    var opt = "<option value='"+s_sym+"'>"+s_sym+"</option>"
+                    var opt = "<option value='" + s_sym + "'>" + s_sym + "</option>"
                     $("#stockSelect").append(opt);
                 })
 
             })
         });
 
-        function calValues() {
-            $(".stock-row").each(function () {
-                s_num = parseInt(this.children[2].innerText)
-                s_price = parseFloat(this.children[3].innerText)
-                this.children[1].innerText = (s_num * s_price).toFixed(2)
-            })
+        function eFormatter(value, row) {
+            s_num = parseInt(row['num'])
+            s_price1 = parseFloat(row['cur'])
+            s_price2 = s_price1 - parseFloat(row['avg'])
+            row['val'] = (s_num * s_price2).toFixed(2)
+            return row['val']
+        }
+
+        function pFormatter(value, row) {
+            s_num = parseInt(row['num'])
+            s_price = parseFloat(row['avg'])
+            row['pay'] = (s_num * s_price).toFixed(2)
+            return row['pay']
         }
 
         function chgSym() {
