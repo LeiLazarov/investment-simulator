@@ -17,7 +17,7 @@ class Detail(models.Model):
     currency = models.CharField(null=False, max_length=8) # Currency used in company filings
     exchange= models.CharField(null=False, max_length=32) # Listed exchange
     phone = models.CharField(null=False, max_length=20)
-    ipo = models.DateTimeField()
+    ipo = models.DateField()
     marketCapitalization = models.IntegerField() # Market Capitalization
     phone = models.CharField(null=False, max_length=32) # Company phone number
     shareOutstanding = models.FloatField()# Number of oustanding shares

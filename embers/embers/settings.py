@@ -133,7 +133,7 @@ STATICFILES_DIRS = [
 
 # add a media directory to store files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # add the session module(store in the cache)
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'  # 引擎
