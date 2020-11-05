@@ -55,40 +55,41 @@ def table(request):
     stats = refreshStat(uid)
     acc = {'a': "${:,}".format(stats[0]), 'c': "${:,}".format(stats[1])
         , 's': "${:,}".format(stats[2]), 'e': "${:,}".format(stats[3])
-        , 'cv':str(stats[1]),'sv':str(stats[2])}
+        , 'cv': str(stats[1]), 'sv': str(stats[2])}
 
     # owned stock part
     owned_list = models.Owned.objects.filter(user_id=uid)
 
-    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
+    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list': owned_list})
+
 
 def checkStock(request, offset):
     try:
         stockItem = getStockQuote(request, offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
-            res['name']=stockItem.detail.cmpname
-            res['type']='success'
+            res['name'] = stockItem.detail.cmpname
+            res['type'] = 'success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
-    return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type': 'error'}, content_type="application/json")
+    return HttpResponse({'type': 'error'}, content_type="application/json")
+
 
 def sellCheckStock(request, offset):
     uid = request.session.get('user_id', '')
     try:
         stockItem = getStockQuote(request, offset.upper())
         if stockItem:
-            ownStock = models.Owned.objects.get(user_id=uid,stock=stockItem)
+            ownStock = models.Owned.objects.get(user_id=uid, stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
             res['name'] = stockItem.detail.cmpname
-            res['type']='success'
+            res['type'] = 'success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
-    return HttpResponse({'type':'error'}, content_type="application/json")
-
+        return HttpResponse({'type': 'error'}, content_type="application/json")
+    return HttpResponse({'type': 'error'}, content_type="application/json")
 
 
 def getOwned(request):
@@ -98,12 +99,13 @@ def getOwned(request):
         res = json.loads(serialize('json', queryset))
         data = []
         for row in res:
-            row['fields']['values']="${:,}".format(int(row['fields']['quantity'])*Decimal(row['fields']['avg_price']))
+            row['fields']['values'] = "${:,}".format(
+                int(row['fields']['quantity']) * Decimal(row['fields']['avg_price']))
             row['fields']['id'] = row['pk']
             row['fields']['symbol'] = Stock.objects.get(pk=row['fields']['stock']).symbol
             data.append(row['fields'])
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type': 'error'}, content_type="application/json")
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
@@ -132,7 +134,6 @@ def buy_stock(request):
                 element.min_price = s_price
             element.save()
         else:
-            stock = Stock.objects.get(symbol=s_symbol)
             # add this stock to owned table
             models.Owned.objects.create(
                 user=user,
@@ -143,8 +144,17 @@ def buy_stock(request):
                 max_price=s_price,
             )
         # reduce cash
-        user.cash -=s_price*s_num
+        user.cash -= s_price * s_num
         user.save()
+
+        # record this to list
+        models.Record.objects.create(
+            user=user,
+            stock=stock,
+            quantity=s_num,
+            price=s_price,
+            type=False  # buy: false, sell: true
+        )
 
     except Exception as e:
         return HttpResponse(json.dumps(ret), content_type="application/json")
@@ -175,8 +185,17 @@ def sell_stock(request):
         else:
             raise Exception
         # increase cash
-        user.cash +=s_price*s_num
+        user.cash += s_price * s_num
         user.save()
+
+        # record this to list
+        models.Record.objects.create(
+            user=user,
+            stock=stock,
+            quantity=s_num,
+            price=s_price,
+            type=True  # buy: false, sell: true
+        )
 
     except Exception as e:
         return HttpResponse(json.dumps(ret), content_type="application/json")
@@ -187,11 +206,10 @@ def sell_stock(request):
 def refreshStat(uid):
     user = User.objects.get(pk=uid)
     # modify the statistics
-    ownStocks =models.Owned.objects.filter(user=user)
+    ownStocks = models.Owned.objects.filter(user=user)
     stockValue = Decimal(0)
     for ss in ownStocks:
-        stockValue+= ss.quantity * ss.stock.price
+        stockValue += ss.quantity * ss.stock.price
 
     # account value, cash, stock value, earning
-    return [stockValue+user.cash, user.cash, stockValue, stockValue+user.cash-user.init]
-
+    return [stockValue + user.cash, user.cash, stockValue, stockValue + user.cash - user.init]
