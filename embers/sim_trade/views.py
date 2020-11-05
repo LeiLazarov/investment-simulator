@@ -10,18 +10,21 @@ from django.core.serializers import serialize
 from decimal import *
 from stock.views import getStockQuote
 import datetime
-
+from sim_trade.models import Owned
 
 # Create your views here.
 
 # Yiren 的 sim_trade/views在下面
 
+
 def sim_trade(request):
     if request.method == 'GET':
         not_found_msg = None
-        return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
+    return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
 
-    elif request.method == 'POST':
+
+def sim_trade_stock(request):
+    if request.method == 'POST':
         stock_code = request.POST.get('stock_code').upper()
         stock_quote = requests.get(
             'https://finnhub.io/api/v1/quote?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug')
@@ -29,32 +32,27 @@ def sim_trade(request):
             'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug'
         )
 
-        # stock_candles = requests.get('https://finnhub.io/api/v1/stock/candle?symbol=' + stock_code
-        #                              + '&resolution=D&from=1572651390&to=1572910590&token=buajtbf48v6ocn3pc8ug')
-        # print(stock_quote.json())
-        # print(company_info.json())
-
         if len(company_info.json()) == 0:
-            not_found_msg = "Not found stock!"
+            not_found_msg = "The stock might not exist!"
             return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
 
-    return render(request, 'sim_trade/stock.html', {'stock': stock_quote.json(), 'company_info': company_info.json()})
+        return render(request, 'sim_trade/stock.html',
+                      {'stock': stock_quote.json(), 'company_info': company_info.json()})
 
 
 def post_follow(request, sym):
-    # print(sym)
     # 通过stock.html里的“Follow”按钮拿到了company_info.ticker, 通过url传递过来
     if request.method == 'POST':
-        if WatchList.objects.filter(symbol=sym, user=1):
+        user_id = request.session.get('user_id', '')
+        if WatchList.objects.filter(symbol=sym, user=user_id):
             # 该symbol已经被此用户follow，执行“提示”
             # models.WatchList.objects.filter(user=1, symbol=sym).delete()
-            return HttpResponse("already  in your list")# 为什么already和in之间有两个空格才显示一个空格
+            return redirect('/', "already  in your list")  # 为什么already和in之间有两个空格才显示一个空格
         else:
             # 该symbol未被此用户follow，执行“添加”
-            item_id = User.objects.get(id=1)# WatchList.user是来自User.id的外键，要先实例化外键database
-            WatchList(symbol=sym, user=item_id).save()# 再把外键作为WatchList的键，进行添加save
-            return HttpResponse("successfully  followed")
-
+            item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
+            WatchList(symbol=sym, user=item_id).save()  # 再把外键作为WatchList的键，进行添加save
+            return redirect('/watchlist/')
     else:
         raise Exception
 
@@ -70,7 +68,7 @@ def table(request):
         , 'cv':str(stats[1]),'sv':str(stats[2])}
 
     # owned stock part
-    owned_list = models.Owned.objects.filter(user_id=uid)
+    owned_list = Owned.objects.filter(user_id=uid)
 
     return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
 
@@ -93,7 +91,7 @@ def sellCheckStock(request, offset):
     try:
         stockItem = getStockQuote(request, offset.upper())
         if stockItem:
-            ownStock = models.Owned.objects.get(user_id=uid,stock=stockItem)
+            ownStock = Owned.objects.get(user_id=uid,stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
             res['name'] = stockItem.detail.cmpname
@@ -107,7 +105,7 @@ def sellCheckStock(request, offset):
 def getOwned(request):
     try:
         uid = request.session.get('user_id', '')
-        queryset = models.Owned.objects.filter(user_id=uid)
+        queryset = Owned.objects.filter(user_id=uid)
         res = json.loads(serialize('json', queryset))
         data = []
         for row in res:
@@ -130,7 +128,7 @@ def buy_stock(request):
     try:
         user = User.objects.get(id=uid)
         stock = Stock.objects.get(symbol=s_symbol)
-        own_stock = models.Owned.objects.filter(user=user, stock=stock)
+        own_stock = Owned.objects.filter(user=user, stock=stock)
         if own_stock.exists():
             # modify the value of holding stock
             element = own_stock.first()
@@ -147,7 +145,7 @@ def buy_stock(request):
         else:
             stock = Stock.objects.get(symbol=s_symbol)
             # add this stock to owned table
-            models.Owned.objects.create(
+            Owned.objects.create(
                 user=user,
                 stock=stock,
                 quantity=s_num,
@@ -175,7 +173,7 @@ def sell_stock(request):
     try:
         user = User.objects.get(id=uid)
         stock = Stock.objects.get(symbol=s_symbol)
-        own_stock = models.Owned.objects.filter(user=user, stock=stock)
+        own_stock = Owned.objects.filter(user=user, stock=stock)
         if own_stock.exists():
             # modify the value of holding stock
             element = own_stock.first()
@@ -200,11 +198,12 @@ def sell_stock(request):
 def refreshStat(uid):
     user = User.objects.get(pk=uid)
     # modify the statistics
-    ownStocks =models.Owned.objects.filter(user=user)
+    ownStocks = Owned.objects.filter(user=user)
     stockValue = Decimal(0)
     for ss in ownStocks:
         stockValue+= ss.quantity * ss.stock.price
 
     # account value, cash, stock value, earning
     return [stockValue+user.cash, user.cash, stockValue, stockValue+user.cash-user.init]
+
 
