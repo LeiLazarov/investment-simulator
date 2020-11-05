@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect
 from login import models
-from decimal import *
+
 
 def index(request):
     return render(request, 'index.html')
 
 
 def login(request):
-    # if request.session.get('is_login', None):
-    #     return redirect('/')
+    if request.session.get('user_id', ''):
+        return redirect("/table/")
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -21,7 +21,7 @@ def login(request):
                 message = 'username does not exist!'
                 return render(request, 'login/login.html', {'message': message})
             if user.password == password:
-                response = redirect('/sim_trade/')
+                response = redirect('/table/')
                 request.session['user_id'] = user.id
                 if remember == "on":
                     response.set_cookie('username', user.username, max_age=7 * 24 * 3600)
@@ -67,9 +67,9 @@ def registration(request):
 
 
 def logout(request):
-    if not request.session.get('is_login', None):
+    if not request.session.get('user_id', None):
         return redirect('/login/')
     request.session.flush()
-    return redirect('/login/')
+    return redirect('/')
 
 

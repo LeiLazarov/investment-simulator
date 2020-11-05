@@ -1,4 +1,6 @@
 from django.db import models
+# from watchlist.models import WatchList
+
 
 class Owned(models.Model):
     id = models.AutoField(primary_key=True)
@@ -8,6 +10,7 @@ class Owned(models.Model):
     avg_price = models.DecimalField(max_digits=6,decimal_places=2)
     min_price = models.DecimalField(max_digits=6,decimal_places=2)
     max_price = models.DecimalField(max_digits=6,decimal_places=2)
+
 
 class Record(models.Model):
     id = models.AutoField(primary_key=True)

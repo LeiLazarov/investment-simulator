@@ -3,24 +3,34 @@
 
 {% block content %}
 
+<body>
+
+<!-- 这里的jquery为什么没有作用 -->
+<!--<script>-->
+<!--    var found_stock_flag = {{ found_stock_flag }};-->
+<!--    $(document).ready(function() {-->
+<!--      $("#exampleModalCenter").modal('show');-->
+<!--    });-->
+<!--</script>-->
+
     <section class="bg-gradient text-white pb-0 o-hidden">
       <div class="container">
         <div class="row section-title justify-content-center text-center">
-{#          <div class="col-md-9 col-lg-8 col-xl-7">#}
-{#            <h3 class="display-4">Stay right up to date</h3>#}
-{#          </div>#}
         </div>
         <div class="row justify-content-center text-center">
           <div class="col-xl-7 col-lg-8 col-md-10">
-            <form data-form-email novalidate action="{% url 'sim_trade:sim_trade' %}" method="post">
+            <form data-form-email novalidate action="{% url 'sim_trade:sim_trade_stock' %}" method="post">
                 {% csrf_token %}
+                {% if not_found_msg %}
+                    <div class="alert alert-warning">{{ not_found_msg }}</div>
+                {% endif %}
                 <div class="d-flex flex-column flex-sm-row form-group">
                     <input class="form-control form-control-lg mr-sm-2 mb-2 mb-sm-0 h-100" name="stock_code" placeholder="Stock Code" type="text" required>
                     <button class="btn btn-lg btn-primary btn-loading" type="submit" data-loading-text="Sending">
                         <span>Search</span>
                     </button>
                 </div>
-              <div class="text-muted">find the stock you want</div>
+                <h4 class="text-muted" id="not_found_p">search the stock you want</h4>
             </form>
           </div>
         </div>
@@ -29,7 +39,46 @@
         <div class="blob bottom left w-100 h-100 bg-white opacity-10"></div>
       </div>
       <div class="divider divider-bottom bg-primary-3"></div>
+
     </section>
+<!--    &lt;!&ndash; Button trigger modal &ndash;&gt;-->
+<!--        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">-->
+<!--            Launch demo modal-->
+<!--        </button>-->
+
+
+<!--
+        &lt;!&ndash; Modal &ndash;&gt;
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="false">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">The stock is not found.</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+-->
+
+
+<!--<script type="text/javascript">
+    var found_stock_flag = {{ found_stock_flag }};
+    if (found_stock_flag==0){
+        // alert('The stock is not found.');
+        var x="The stock you search is not found!"
+        document.getElementById("not_found_p").innerHTML=x;
+    }
+</script>-->
+
+</body>
+
+
 
 {#    <section class="bg-primary-3 text-white">#}
 {#      <div class="container">#}

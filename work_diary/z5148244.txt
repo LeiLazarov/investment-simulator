@@ -19,3 +19,6 @@ I program a module about 'contact us' page, in this way, getting farmiliar with 
 
 <Week6>
 Try to finish a 'search bar' module and fail. Improve team member CaoLei's code and develop this module.
+
+<Week7>
+Update "add to my watch-list".

@@ -15,3 +15,5 @@ class WatchList(models.Model):
 
     class Meta:
         verbose_name_plural = 'WatchLists'
+        ordering = ['-createdAt']
+

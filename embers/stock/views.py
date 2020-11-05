@@ -1,5 +1,3 @@
-import os
-
 import requests
 from django.shortcuts import render, redirect
 from stock import models
@@ -7,9 +5,9 @@ from datetime import datetime, timedelta
 from django.utils.timezone import utc
 import json
 import time
-from django.http import Http404
 
 from embers import settings
+from stock.models import Stock, Detail
 
 
 def stock(request, offset):
@@ -27,7 +25,7 @@ def stock(request, offset):
 def getStockQuote(request, symbol):
     token = 'buch32v48v6t51vholng'
     # search the local database
-    stockFilter = models.Stock.objects.filter(symbol=symbol)
+    stockFilter = Stock.objects.filter(symbol=symbol)
 
     if stockFilter.exists(): # local contains
         stockItem = stockFilter.first()
@@ -58,19 +56,19 @@ def getStockQuote(request, symbol):
             stockItem.save()
 
         return stockItem
-    else: # get it from API and store in the local
+    else:  # get it from API and store in the local
         # get data
         quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
 
-        if quote.status_code != 200: # fail to get data
+        if quote.status_code != 200:  # fail to get data
             raise Exception
 
-        quote = json.loads(quote.text) # convert data from json to dict
+        quote = json.loads(quote.text)  # convert data from json to dict
 
-        if quote['t'] == 0: # the api return a null dict
+        if quote['t'] == 0:  # the api return a null dict
             raise Exception
         # store it to the local
-        stockItem = models.Stock.objects.create(
+        stockItem = Stock.objects.create(
             symbol=symbol,
             price=float(quote['c']),
             open=float(quote['o']),
@@ -81,9 +79,10 @@ def getStockQuote(request, symbol):
         )
         return stockItem
 
+
 # similar to get stock, it gets stock detail from its symbol
 def getStockDetail(request,symbol):
-    detailFilter = models.Detail.objects.filter(symbol=symbol)
+    detailFilter = Detail.objects.filter(symbol=symbol)
 
     if detailFilter.exists():  # local contains
         return detailFilter.first()
@@ -131,7 +130,7 @@ def getStockDetail(request,symbol):
             json.dump(result, f)
         # store company info to local
         stock = models.Stock.objects.get(symbol=symbol)
-        detailItem = models.Detail.objects.create(
+        detailItem = Detail.objects.create(
             stock=stock,
             symbol=symbol,
             country=info['country'],

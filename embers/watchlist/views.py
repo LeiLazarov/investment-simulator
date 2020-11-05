@@ -1,8 +1,7 @@
 import requests
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.forms import model_to_dict
-from django.shortcuts import render
-
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from watchlist.models import WatchList
@@ -45,3 +44,10 @@ def watchlist_detail(request, id):
     stock_detail.company_info = company_info.json()
 
     return render(request, 'watchlist/watchlist_detail.html', {'stock_detail': stock_detail})
+
+
+def watchlist_delete(request, offset):
+    code = offset.upper()
+    # delete_id = request.GET.get('delete_id')
+    WatchList.objects.filter(symbol=code).delete()
+    return redirect('/watchlist/')

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'tutorial',
     'sim_trade',
     'watchlist',
+    'statistic',
     'stock',  # app for showing stock detail
     'django_crontab',  # for job scheduling
 ]
@@ -141,7 +142,6 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_SAVE_EVERY_REQUEST = False
-
 
 CRONJOBS = [
     ('*/10 * * * *', 'stock.cron.update_stock')

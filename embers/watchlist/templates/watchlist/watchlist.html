@@ -20,8 +20,8 @@
             <div class="row justify-content-between align-items-start">
                 <div class="col-lg-8">
                     {% for stock in my_watchlist %}
-                        <div class="mb-3 mb-sm-4">
-                            <a href="{% url 'watchlist:watchlist_detail' stock.id %}" class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow">
+                        <div class="mb-3 mb-sm-4 ">
+                            <a href="{% url 'stock:stock' stock.symbol %}" class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow">
                                 <div style="width: 100%;">
                                     <span>Stock Code: {{ stock.symbol}}</span>
 {#                                    <span style="float: right; margin-left: 12%;">{{ stock.user.username }}</span>#}
@@ -31,15 +31,43 @@
                                     <p>percentage change</p>
                                     <div>
                                     <p class="card-text" style="float: left">{{ stock.createdAt }}</p>
-                                    <button class="btn btn-primary" type="button" style="float: right">
-                                         Remove
-                                    </button>
+{#                                    <button class="btn btn-primary" type="button" style="float: right" data-toggle="modal" data-target="deleteConfirmation">#}
+{#                                         Remove#}
+{#                                    </button>#}
                                     </div>
                                 </div>
-                            </a>
-                        </div>
-                    {% endfor %}
 
+                            </a>
+                             <form  action="{% url 'watchlist:delete' stock.symbol %}" method="post">
+                                {% csrf_token %}
+                                    <button class="btn btn-primary " type="submit" style="margin-top:5px;">
+                                        <span>Remove</span>
+                                    </button>
+                            </form>
+{#                            <button class="btn btn-primary" style="margin-top:5px;" type="button"  onclick="deleteStock({% url 'watchlist:delete' stock.symbol %})">#}
+{#                                Remove#}
+{#                            </button>#}
+                        </div>
+
+{#                        <div class="" style="position: fixed; top: 100px; left: 100px;  display: none; width: 100%;#}
+{#                                                        height: 100%; overflow: hidden; outline: 0; "#}
+{#                             id="deleteConfirmation"   tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">#}
+{#                            <div class="modal-dialog">#}
+{#                                <div class="modal-content">#}
+{#                                    <div class="modal-header">#}
+{#                                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>#}
+{#                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                            <span aria-hidden="true">&times;</span>#}
+{#                                        </button>#}
+{#                                    </div>#}
+{#                                    <div class="modal-footer">#}
+{#                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>#}
+{#                                        <button type="button" class="btn btn-primary" onclick="deleteStock()">Delete</button>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+                    {% endfor %}
                     <div class="row justify-content-center mt-4">
                         <div class="col-auto">
                             <nav>
@@ -77,4 +105,26 @@
     </section>
 
 
+{% endblock %}
+
+{% block script_content %}
+    <script>
+        function deleteStock(url) {
+            alert('here')
+            {#var r = confirm('Confirm to delete?')#}
+            if (true){
+                $.ajax({
+                    url: "http://127.0.0.1:8000/" + url,
+                    type:'DELETE',
+                    dataType: 'json',
+                     success: function(res){
+
+                     },
+                    error: function(res){
+                // 错误时处理逻辑
+            }
+            });
+            }
+        }
+    </script>
 {% endblock %}

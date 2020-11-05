@@ -11,3 +11,7 @@ I studied the frame of Django and the knowlege about html.
 Week05
 We hold the retrospective meeting and discussed the next development plan. 
 I started to build the webpage of the user's history.
+Week06
+I built the record webpage to represent the history of user sim-trade.
+Week07
+I started to build the statistic webpage which will show the detail about the user's account.
