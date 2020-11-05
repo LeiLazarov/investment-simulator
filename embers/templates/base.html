@@ -114,13 +114,13 @@
     <div class="container">
         <div class="row">
             <div class="col-xl-auto mr-xl-5 col-md-3 mb-4 mb-md-0">
-                <h5>About us</h5>
+                <h5>Content</h5>
                 <ul class="nav flex-row flex-md-column">
                     <li class="nav-item mr-3 mr-md-0">
-                        <a href="landing-1.html" class="nav-link fade-page px-0 py-2">demo 1</a>
+                        <a href="{% url 'watchlist:watchlist' %}" class="nav-link fade-page px-0 py-2">Watchlist</a>
                     </li>
                     <li class="nav-item mr-3 mr-md-0">
-                        <a href="landing-2.html" class="nav-link fade-page px-0 py-2">demo 2</a>
+                        <a href="{% url 'sim_trade:sim_trade' %}" class="nav-link fade-page px-0 py-2">SimTrade</a>
                     </li>
                 </ul>
             </div>
@@ -128,10 +128,13 @@
                 <h5>Tutorials</h5>
                 <ul class="nav flex-row flex-md-column">
                     <li class="nav-item mr-3 mr-md-0">
-                        <a href="company-about-1.html" class="nav-link fade-page px-0 py-2">tutorial 1</a>
+                        <a href="{% url 'tutorial:intro' %}" class="nav-link fade-page px-0 py-2">Tutorial</a>
                     </li>
                     <li class="nav-item mr-3 mr-md-0">
-                        <a href="blog-listing-1.html" class="nav-link fade-page px-0 py-2">tutorial 2</a>
+                        <a href="{% url 'about_us' %}" class="nav-link fade-page px-0 py-2">About Us</a>
+                    </li>
+                    <li class="nav-item mr-3 mr-md-0">
+                        <a href="{% url 'contact_us' %}" class="nav-link fade-page px-0 py-2">Contact Us</a>
                     </li>
                 </ul>
             </div>
