@@ -9,95 +9,100 @@
     <section class="pb-0">
         <div class="container">
             <div class="p-0 text-dark rounded bg-white">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Account</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="{% url 'statistic:record' %}" class="btn btn-sm btn-secondary">
-                            View record
-                        </a>
-{#                        <a href="{% url 'statistic:analysis' %}" class="btn btn-sm btn-secondary">#}
-{#                            View Graph Statistics#}
-{#                        </a>#}
+                <div data-intro='This table shows your asset statistic!' data-step='1'>
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Account</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a href="javascript:void(0);" onclick="javascript:introJs().setOption('showProgress', true).start();" class="mr-2 btn btn-sm btn-info">
+                                Intro
+                            </a>
+                            <a href="{% url 'statistic:record' %}" class="btn btn-sm btn-secondary"
+                               data-intro='Click this button to view your trade record.' data-step='5'>
+                                View record
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="d-flex mb-3">
-                    <div class="p-2 flex-fill">
-                        <div class="numbers">
-                            <a href="#" data-toggle="tooltip" data-placement="top"
-                               title="Calculated as: = cash + market value of stocks">
-                                Account Value</a>
-                            <h4 class="mt-2 card-title">{{ acc.a }}</h4>
+                    <div class="d-flex mb-3">
+                        <div class="p-2 flex-fill">
+                            <div class="numbers">
+                                <a href="#" data-toggle="tooltip" data-placement="top"
+                                   title="Calculated as: = cash + market value of stocks">
+                                    Account Value</a>
+                                <h4 class="mt-2 card-title">{{ acc.a }}</h4>
+                            </div>
                         </div>
-                    </div>
-                    <div class="p-2 flex-fill">
-                        <div class="numbers">
-                            <a href="#" data-toggle="tooltip" data-placement="top"
-                               title="Total amount of cash available for trading stocks with">
-                                Cash</a>
-                            <h4 class="mt-2 card-title">{{ acc.c }}</h4>
+                        <div class="p-2 flex-fill">
+                            <div class="numbers">
+                                <a href="#" data-toggle="tooltip" data-placement="top"
+                                   title="Total amount of cash available for trading stocks with">
+                                    Cash</a>
+                                <h4 class="mt-2 card-title">{{ acc.c }}</h4>
+                            </div>
                         </div>
-                    </div>
-                    <div class="p-2 flex-fill">
-                        <div class="numbers">
-                            <a href="#" data-toggle="tooltip" data-placement="top"
-                               title="Total market value of stocks">
-                                Stock Value</a>
-                            <h4 class="mt-2 card-title">{{ acc.s }}</h4>
+                        <div class="p-2 flex-fill">
+                            <div class="numbers">
+                                <a href="#" data-toggle="tooltip" data-placement="top"
+                                   title="Total market value of stocks">
+                                    Stock Value</a>
+                                <h4 class="mt-2 card-title">{{ acc.s }}</h4>
+                            </div>
                         </div>
-                    </div>
-                    <div class="p-2 flex-fill">
-                        <div class="numbers">
-                            <a href="#" data-toggle="tooltip" data-placement="top"
-                               title="Calculated as: = starting account value - current account value">
-                                Earning Value</a>
-                            <h4 class="mt-2 card-title">{{ acc.e }}</h4>
+                        <div class="p-2 flex-fill">
+                            <div class="numbers">
+                                <a href="#" data-toggle="tooltip" data-placement="top"
+                                   title="Calculated as: = starting account value - current account value">
+                                    Earning Value</a>
+                                <h4 class="mt-2 card-title">{{ acc.e }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <h2>Owned Stocks</h2>
-                <div id="toolbar">
-                    <div class="form-inline" role="form">
-                        <button type="button" class="btn btn-sm btn-info     ml-2" data-toggle="modal"
-                                data-target="#purchase">
-                            Buy stock
-                        </button>
-                        <button type="button" class="btn btn-sm btn-warning ml-2" data-toggle="modal"
-                                data-stock="" data-target="#sold">
-                            Sell stock
-                        </button>
+                <div data-intro='This panel about your stock!' data-step='2'>
+                    <h2>Owned Stocks</h2>
+                    <div id="toolbar" data-intro='Click these buttons to buy or sell stocks' data-step='3'>
+                        <div class="form-inline" role="form">
+                            <button type="button" class="btn btn-sm btn-info ml-2" data-toggle="modal"
+                                    data-target="#purchase">
+                                Buy stock
+                            </button>
+                            <button type="button" class="btn btn-sm btn-warning ml-2" data-toggle="modal"
+                                    data-stock="" data-target="#sold">
+                                Sell stock
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <table id="ownedStock" data-toolbar="#toolbar" data-toggle="table" data-search="true">
-                    <thead>
-                    <tr>
-                        <th data-field="sym" data-sortable="true">Symbol</th>
-                        <th data-field="val" data-sortable="true" data-formatter="eFormatter">Earnings</th>
-                        <th data-field="num" data-sortable="true">Quantity</th>
-                        <th data-field="cur" data-sortable="true">Current price</th>
-                        <th data-field="pay" data-sortable="true" data-formatter="pFormatter">Total paid</th>
-                        <th data-field="avg" data-sortable="true">Avg. purchase price</th>
-                        <th data-field="min" data-sortable="true">Min.</th>
-                        <th data-field="max" data-sortable="true">Max.</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in owned_list %}
-                        <tr class="stock-row">
-                            <td><a href='/stock/{{ row.stock.symbol }}' title='View detail'
-                                   target='_blank'>{{ row.stock.symbol }}</a></td>
-                            <td>{{ row.id }}</td>
-                            <td>{{ row.quantity }}</td>
-                            <td>{{ row.stock.price }}</td>
-                            <td>{{ row.id }}</td>
-                            <td>{{ row.avg_price }}</td>
-                            <td>{{ row.min_price }}</td>
-                            <td>{{ row.max_price }}</td>
+                    <table id="ownedStock" data-toolbar="#toolbar" data-toggle="table" data-search="true"
+                           data-intro='All stocks you hold will show here.' data-step='4'>
+                        <thead>
+                        <tr>
+                            <th data-field="sym" data-sortable="true">Symbol</th>
+                            <th data-field="val" data-sortable="true" data-formatter="eFormatter">Earnings</th>
+                            <th data-field="num" data-sortable="true">Quantity</th>
+                            <th data-field="cur" data-sortable="true">Current price</th>
+                            <th data-field="pay" data-sortable="true" data-formatter="pFormatter">Total paid</th>
+                            <th data-field="avg" data-sortable="true">Avg. purchase price</th>
+                            <th data-field="min" data-sortable="true">Min.</th>
+                            <th data-field="max" data-sortable="true">Max.</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for row in owned_list %}
+                            <tr class="stock-row">
+                                <td><a href='/stock/{{ row.stock.symbol }}' title='View detail'
+                                       target='_blank'>{{ row.stock.symbol }}</a></td>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.quantity }}</td>
+                                <td>{{ row.stock.price }}</td>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.avg_price }}</td>
+                                <td>{{ row.min_price }}</td>
+                                <td>{{ row.max_price }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </section>
