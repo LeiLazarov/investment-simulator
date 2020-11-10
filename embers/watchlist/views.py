@@ -1,11 +1,12 @@
 import requests
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.forms import model_to_dict
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.shortcuts import redirect, HttpResponse
+
 
 # Create your views here.
 from watchlist.models import WatchList
-
 
 def watchlist(request):
     my_watchlist = WatchList.objects.filter(user=1)
@@ -22,8 +23,11 @@ def watchlist(request):
         stock_quote = requests.get(
             'https://finnhub.io/api/v1/quote?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug')
         company_info = requests.get(
-            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug')
+            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock.symbol + '&token=buajtbf48v6ocn3pc8ug'
+        )
         stock.stock_quote = stock_quote.json()
+        stock.stock_quote["res"] = "{:.3f}".format(
+            (stock.stock_quote["c"]-stock.stock_quote["pc"])*100/stock.stock_quote["pc"])
         stock.company_info = company_info.json()
         # print(stock.stock_quote)
         # print(stock_quote.json())
@@ -51,3 +55,16 @@ def watchlist_delete(request, offset):
     # delete_id = request.GET.get('delete_id')
     WatchList.objects.filter(symbol=code).delete()
     return redirect('/watchlist/')
+
+# def reviews(request):
+#     review_list = Review.objects.all()
+#     page_number = request.GET.get('page', 1)
+#     paginator = Paginator(review_list, 2)
+#     try:
+#         page_reviews = paginator.page(page_number)
+#     except PageNotAnInteger:
+#         page_reviews = paginator.page(1)
+#     except EmptyPage:
+#         page_reviews = paginator.page(paginator.num_pages)
+#
+#     return render(request, 'reviews.html', {'page_reviews': page_reviews})
