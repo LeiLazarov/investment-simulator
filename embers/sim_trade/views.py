@@ -47,7 +47,8 @@ def post_follow(request, sym):
         if WatchList.objects.filter(symbol=sym, user=user_id):
             # 该symbol已经被此用户follow，执行“提示”
             # models.WatchList.objects.filter(user=1, symbol=sym).delete()
-            return redirect('/', "already  in your list")  # 为什么already和in之间有两个空格才显示一个空格
+            not_found_msg = "The stock is already in your list"
+            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
         else:
             # 该symbol未被此用户follow，执行“添加”
             item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
