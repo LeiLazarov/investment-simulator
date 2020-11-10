@@ -13,8 +13,8 @@ from stock.models import Stock, Detail
 def stock(request, offset):
     try:
         offset = offset.upper() # convert to upper char
-        stockItem = getStockQuote(request, offset)
-        detailItem = getStockDetail(request, offset)
+        stockItem = getStockQuote(offset)
+        detailItem = getStockDetail(offset)
     except Exception as e:
         return render(request, 'detail.html', {'error':True})
 
@@ -22,7 +22,7 @@ def stock(request, offset):
 
 
 # get the stock quote from its symbol
-def getStockQuote(request, symbol):
+def getStockQuote(symbol):
     token = 'buch32v48v6t51vholng'
     # search the local database
     stockFilter = Stock.objects.filter(symbol=symbol)
@@ -52,7 +52,7 @@ def getStockQuote(request, symbol):
             stockItem.close=quote['pc']
             stockItem.high=quote['h']
             stockItem.low=quote['l']
-            stockItem.updateAt = datetime.fromtimestamp(int(quote['t'])).replace(tzinfo=None)
+            stockItem.updateAt = datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
             stockItem.save()
 
         return stockItem
@@ -77,11 +77,12 @@ def getStockQuote(request, symbol):
             low=float(quote['l']),
             updateAt=datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
         )
+        getStockDetail(symbol)
         return stockItem
 
 
 # similar to get stock, it gets stock detail from its symbol
-def getStockDetail(request,symbol):
+def getStockDetail(symbol):
     detailFilter = Detail.objects.filter(symbol=symbol)
 
     if detailFilter.exists():  # local contains
@@ -146,3 +147,29 @@ def getStockDetail(request,symbol):
             industry=info['finnhubIndustry'],
         )
         return detailItem
+
+def sim_trade_stock(request):
+    if request.method == 'POST':
+        stock_code = request.POST.get('stock_code').upper()
+
+
+
+def search(request, offset):
+    try:
+        offset = offset.upper() # convert to upper char
+        stock_quote = requests.get(
+            'https://finnhub.io/api/v1/quote?symbol=' + offset + '&token=buajtbf48v6ocn3pc8ug')
+        company_info = requests.get(
+            'https://finnhub.io/api/v1/stock/profile2?symbol=' + offset + '&token=buajtbf48v6ocn3pc8ug'
+        )
+
+        if len(company_info.json()) == 0:
+            not_found_msg = "The stock might not exist!"
+            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
+
+        return render(request, 'sim_trade/stock.html',
+                      {'stock': stock_quote.json(), 'company_info': company_info.json()})
+    except Exception as e:
+        render(request, 'sim_trade/stock.html')
+
+    render(request, 'sim_trade/stock.html')

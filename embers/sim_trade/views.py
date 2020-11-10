@@ -65,7 +65,7 @@ def table(request):
     stats = refreshStat(uid)
     acc = {'a': "${:,}".format(stats[0]), 'c': "${:,}".format(stats[1])
         , 's': "${:,}".format(stats[2]), 'e': "${:,}".format(stats[3])
-        , 'cv':str(stats[1]),'sv':str(stats[2])}
+        , 'cv':str(stats[1]),'sv':str(stats[2]),'ev':str(stats[3])}
 
     # owned stock part
     owned_list = Owned.objects.filter(user_id=uid)
@@ -75,7 +75,7 @@ def table(request):
 
 def checkStock(request, offset):
     try:
-        stockItem = getStockQuote(request, offset.upper())
+        stockItem = getStockQuote(offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['name']=stockItem.detail.cmpname
@@ -89,12 +89,13 @@ def checkStock(request, offset):
 def sellCheckStock(request, offset):
     uid = request.session.get('user_id', '')
     try:
-        stockItem = getStockQuote(request, offset.upper())
+        stockItem = getStockQuote(offset.upper())
         if stockItem:
             ownStock = Owned.objects.get(user_id=uid,stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
             res['name'] = stockItem.detail.cmpname
+            res['avgp'] = float(ownStock.avg_price)
             res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:

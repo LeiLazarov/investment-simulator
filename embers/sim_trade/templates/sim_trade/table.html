@@ -13,7 +13,9 @@
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1 class="h2">Account</h1>
                         <div class="btn-toolbar mb-2 mb-md-0">
-                            <a href="javascript:void(0);" onclick="javascript:introJs().setOption('showProgress', true).start();" class="mr-2 btn btn-sm btn-info">
+                            <a href="javascript:void(0);"
+                               onclick="javascript:introJs().setOption('showProgress', true).start();"
+                               class="mr-2 btn btn-sm btn-info">
                                 Intro
                             </a>
                             <a href="{% url 'statistic:record' %}" class="btn btn-sm btn-secondary"
@@ -246,6 +248,11 @@
                                     <input type="text" readonly class="form-control-plaintext" id="sell_curP"
                                            value="">
                                 </div>
+                                <label for="sell_avgP" class="col-sm-3 col-form-label">PURCHASE</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_avgP"
+                                           value="">
+                                </div>
                                 <label for="sell_highP" class="col-sm-3 col-form-label">DAY'S HIGH</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="sell_highP"
@@ -266,16 +273,17 @@
                                     <input type="text" readonly class="form-control-plaintext" id="sell_clsP"
                                            value="">
                                 </div>
+                                <label for="sell_max" class="col-sm-3 col-form-label">HOLDING</label>
+                                <div class="col-sm-3">
+                                    <input type="text" readonly class="form-control-plaintext" id="sell_max"
+                                           value="">
+                                </div>
                                 <label for="sell_update" class="col-sm-3 col-form-label">UPDATE</label>
                                 <div class="col-sm-3">
                                     <input type="text" readonly class="form-control-plaintext" id="sell_update"
                                            value="">
                                 </div>
-                                <label for="sell_max" class="col-sm-3 col-form-label">HOLDING</label>
-                                <div class="col-sm-6">
-                                    <input type="text" readonly class="form-control-plaintext" id="sell_max"
-                                           value="">
-                                </div>
+
                             </div>
                             <div class="form-group row alert alert-danger d-none" id="sell_checkTip" role="alert"> No
                                 data
@@ -312,6 +320,11 @@
                             <tr>
                                 <td>Stock Value</td>
                                 <td id="sell_stockV" data-value="{{ acc.sv }}">{{ acc.s }}<span id="sell_chgS"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Earning Value</td>
+                                <td id="sell_earnV" data-value="{{ acc.ev }}">{{ acc.e }}<span id="sell_chgE"></span>
                                 </td>
                             </tr>
                         </table>
@@ -355,10 +368,20 @@
 
         function chgSym() {
             $("#button-addon1").attr("disabled", false);
+            $("#stockInfo").addClass('d-none');
+            $("#quantity").val('');
+            $("span#chgC").text('');
+            $("span#chgS").text('');
         }
 
         function chgSym2() {
             $("#button-addon2").attr("disabled", false);
+            $("#sell_stockInfo").addClass('d-none');
+            $("#sell_quantity").val('');
+            $("span#sell_chgC").text('');
+            $("span#sell_chgS").text('');
+            $("span#sell_chgE").text('');
+
         }
 
         function checkStock() {
@@ -393,7 +416,7 @@
 
         function changeQ() {
             var unit = parseFloat($("input#quantity").val())
-            if (unit > 0) {
+            if (unit > 0 & $("#stockInfo").is(":visible")) {
                 var price = parseFloat($("input#curP").val())
                 var cash = parseFloat($("td#cashV").data("value"))
                 var stock = parseFloat($("td#stockV").data("value"))
@@ -412,8 +435,9 @@
                 $('#submit').attr("disabled", false);
                 $()
             } else {
-                $("span#chgC").text('');
-                $("span#chgC").text('');
+                $("span#chgC").text('')
+                $("span#chgS").text('')
+                $("input#quantity").val('')
             }
 
         }
@@ -464,6 +488,7 @@
                         $("div#sell_checkTip").addClass('d-none');
                         $("input#sell_name").val(rawData['name']);
                         $("input#sell_curP").val(rawData['price']);
+                        $("input#sell_avgP").val(rawData['avgp']);
                         $("input#sell_highP").val(rawData['high']);
                         $("input#sell_lowP").val(rawData['low']);
                         $("input#sell_openP").val(rawData['open']);
@@ -484,11 +509,13 @@
 
         function sellChangeQ() {
             var unit = parseInt($("input#sell_quantity").val())
-            if (unit > 0) {
+            if (unit > 0 & $("#sell_stockInfo").is(":visible")) {
                 var hold = parseInt($("input#sell_max").val())
                 var price = parseFloat($("input#sell_curP").val())
                 var cash = parseFloat($("td#sell_cashV").data("value"))
                 var stock = parseFloat($("td#sell_stockV").data("value"))
+                var avgp = parseFloat($("input#sell_avgP").val())
+                var earn = parseFloat($("td#sell_earnV").data("value"))
                 if (unit > hold) {
                     unit = hold;
                 }
@@ -496,15 +523,28 @@
                 var chgC = cash + chg
                 var chgS = stock - unit * price
 
+                var chgE = Math.abs(price - avgp) * unit
+
                 $("span#sell_chgC").text(" + $" + chg.toFixed(2) + " = $" + chgC.toFixed(2));
                 $("span#sell_chgC").css("color", "green");
                 $("span#sell_chgS").text(" - $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
                 $("span#sell_chgS").css("color", "red");
+                if (price > avgp) {
+                    $("span#sell_chgE").text(" + $" + chgE.toFixed(2) + " = $" + (earn + chgE).toFixed(2));
+                    $("span#sell_chgE").css("color", "green");
+                } else if (price == avgp) {
+                    $("span#sell_chgE").text(" + 0 = $" + earn.toFixed(2));
+                } else {
+                    $("span#sell_chgE").text(" - $" + chgE.toFixed(2) + " = $" + (earn - chgE).toFixed(2));
+                    $("span#sell_chgE").css("color", "red");
+                }
                 $("input#sell_quantity").val(parseInt(unit));
                 $('#sell_submit').attr("disabled", false);
             } else {
                 $("span#sell_chgC").text('')
                 $("span#sell_chgS").text('')
+                $("span#sell_chgE").text('')
+                $("input#sell_quantity").val('')
             }
 
         }
