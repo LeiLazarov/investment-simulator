@@ -18,3 +18,9 @@ I implement the front edge part of the simulation trade page.
 
 Week 7
 I will finish the simulation trade page in this week.
+
+Week 8
+This week I polished the UI performance and updated the backend implementation method.
+
+Week 9
+Our team discussed our product and started to write report.

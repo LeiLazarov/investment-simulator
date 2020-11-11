@@ -515,7 +515,6 @@
                 var cash = parseFloat($("td#sell_cashV").data("value"))
                 var stock = parseFloat($("td#sell_stockV").data("value"))
                 var avgp = parseFloat($("input#sell_avgP").val())
-                var earn = parseFloat($("td#sell_earnV").data("value"))
                 if (unit > hold) {
                     unit = hold;
                 }
@@ -530,12 +529,12 @@
                 $("span#sell_chgS").text(" - $" + chg.toFixed(2) + " = $" + chgS.toFixed(2));
                 $("span#sell_chgS").css("color", "red");
                 if (price > avgp) {
-                    $("span#sell_chgE").text(" + $" + chgE.toFixed(2) + " = $" + (earn + chgE).toFixed(2));
+                    $("span#sell_chgE").text(" + $" + chgE.toFixed(2));
                     $("span#sell_chgE").css("color", "green");
                 } else if (price == avgp) {
-                    $("span#sell_chgE").text(" + 0 = $" + earn.toFixed(2));
+                    $("span#sell_chgE").text(" + 0");
                 } else {
-                    $("span#sell_chgE").text(" - $" + chgE.toFixed(2) + " = $" + (earn - chgE).toFixed(2));
+                    $("span#sell_chgE").text(" - $" + chgE.toFixed(2));
                     $("span#sell_chgE").css("color", "red");
                 }
                 $("input#sell_quantity").val(parseInt(unit));
