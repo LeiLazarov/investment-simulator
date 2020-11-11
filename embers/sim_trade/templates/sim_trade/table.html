@@ -464,7 +464,7 @@
                         $('#checkTip').html('Success!')
                         $('#checkTip').removeClass('d-none')
                     } else {
-                        $('#checkTip').html('Fail! Please try again!')
+                        $('#checkTip').html(res['message'])
                         $('#checkTip').removeClass('d-none')
                     }
                     setTimeout(function () {
@@ -570,7 +570,7 @@
                         $('#sell_checkTip').html('Success!')
                         $('#sell_checkTip').removeClass('d-none')
                     } else {
-                        $('#sell_checkTip').html('Fail! Please try again!')
+                        $('#sell_checkTip').html(res['message'])
                         $('#sell_checkTip').removeClass('d-none')
                     }
                     setTimeout(function () {

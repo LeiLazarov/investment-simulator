@@ -10,7 +10,7 @@ from django.core.serializers import serialize
 from decimal import *
 from stock.views import getStockQuote
 import datetime
-from sim_trade.models import Owned
+from sim_trade.models import Owned, Record
 
 # Create your views here.
 
@@ -83,7 +83,7 @@ def checkStock(request, offset):
             res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     return HttpResponse({'type':'error'}, content_type="application/json")
 
 
@@ -100,7 +100,7 @@ def sellCheckStock(request, offset):
             res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     return HttpResponse({'type':'error'}, content_type="application/json")
 
 
@@ -116,12 +116,12 @@ def getOwned(request):
             row['fields']['symbol'] = Stock.objects.get(pk=row['fields']['stock']).symbol
             data.append(row['fields'])
     except Exception as e:
-        return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 def buy_stock(request):
-    ret = {'type': 'fail', 'message': ''}
+    ret = {'type': 'error', 'message': ''}
     data = json.loads(request.body)
     s_symbol = data['symbol']
     s_price = Decimal(data['price']).quantize(Decimal('.00'), rounding=ROUND_DOWN)
@@ -160,7 +160,7 @@ def buy_stock(request):
         user.save()
 
         # record this to list
-        models.Record.objects.create(
+        Record.objects.create(
             user=user,
             stock=stock,
             quantity=s_num,
@@ -169,13 +169,13 @@ def buy_stock(request):
         )
 
     except Exception as e:
-        return HttpResponse(json.dumps(ret), content_type="application/json")
+        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
     ret['type'] = 'success'
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
 
 def sell_stock(request):
-    ret = {'type': 'fail', 'message': ''}
+    ret = {'type': 'error', 'message': ''}
     data = json.loads(request.body)
     s_symbol = data['symbol']
     s_price = Decimal(data['price']).quantize(Decimal('.00'), rounding=ROUND_DOWN)
@@ -201,7 +201,7 @@ def sell_stock(request):
         user.save()
 
         # record this to list
-        models.Record.objects.create(
+        Record.objects.create(
             user=user,
             stock=stock,
             quantity=s_num,
@@ -210,7 +210,7 @@ def sell_stock(request):
         )
 
     except Exception as e:
-        return HttpResponse(json.dumps(ret), content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     ret['type'] = 'success'
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
