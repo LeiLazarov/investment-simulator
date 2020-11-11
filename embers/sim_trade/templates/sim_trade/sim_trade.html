@@ -22,7 +22,10 @@
             <form data-form-email novalidate action="{% url 'sim_trade:sim_trade_stock' %}" method="post">
                 {% csrf_token %}
                 {% if not_found_msg %}
-                    <div class="alert alert-warning">{{ not_found_msg }}</div>
+                    <div class="alert alert-warning alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        {{ not_found_msg }}
+                    </div>
                 {% endif %}
                 <div class="d-flex flex-column flex-sm-row form-group">
                     <input class="form-control form-control-lg mr-sm-2 mb-2 mb-sm-0 h-100" name="stock_code" placeholder="Stock Code" type="text" required>

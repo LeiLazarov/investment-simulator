@@ -1,23 +1,31 @@
-from django.shortcuts import render
+import requests
 
-from sim_trade.models import Record, Owned
-from stock.models import Stock
+from django.shortcuts import render, redirect
+from sim_trade import models as sim_models
 
+import json
+from django.http import HttpResponse
+from django.core.serializers import serialize
+
+from stock import models as stock_models
 
 def table(request):
     return render(request, 'sim_trade/table.html')
 
 
+
 def account_record(request):
-    # uid = request.session.get('user_id', '')
-    uid = 1
-    record_account = Record.objects.filter(user_id=uid).values()
+    uid = request.session.get('user_id', '')
+    if not uid:
+        return redirect("/login/")
+    #uid = 1
+    record_account = sim_models.Record.objects.filter(user_id=uid).values()
     record_list = []
     
     for e in record_account:
         record = {}
         record['id'] = e['id']
-        record['stockname'] = Stock.objects.get(id= e['stock_id']).symbol
+        record['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
         record['quantity'] = e['quantity']
         record['price'] = e['price']
         record['type'] = 'sell' if e['type'] == True else 'buy'
@@ -27,26 +35,35 @@ def account_record(request):
     
     return render(request, 'record/record.html',{'record': record_list})
 
-
 def analysis(request):
-    uid = 1
-    record_account = Owned.objects.filter(user_id=uid).values()
-    record_unit = []
+    uid = request.session.get('user_id', '')
+    if not uid:
+        return redirect("/login/")
+    record_account = sim_models.Owned.objects.filter(user_id=uid).values()
+    
     record_value = []
     for e in record_account:
-        unit = {}
+       
         value = {}
 
-        unit['name'] = Stock.objects.get(id= e['stock_id']).symbol
-        value['stockname'] = Stock.objects.get(id= e['stock_id']).symbol
+        value['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
 
-        unit['value'] = e['quantity']
-        value['owned_value'] = float(e['avg_price'] * e['quantity'])
-        value['current_value'] = float(Stock.objects.get(id= e['stock_id']).price * e['quantity'])
-        record_unit.append(unit)
-        record_value.append(value)
+        value['unit'] = e['quantity']
+        value['owned_value'] = e['avg_price'] * e['quantity']
+        value['current_value'] = stock_models.Stock.objects.get(id= e['stock_id']).price * e['quantity']
+        e = value['current_value'] - value['owned_value']
+        if e > 0:
+            value['profit'] = float(e)
+            value['loss'] = 0
+        else:
+            value['profit'] = 0
+            value['loss'] = float(e)
+
+        value['owned_value'] = float(value['owned_value'])
+        value['current_value'] = float(value['current_value'])
     
+        record_value.append(value)
     account = {}
-    account['unit'] = record_unit
-    account['value'] = record_value
-    return render(request, 'record/analysis.html', {'account': account})
+    
+    account['account'] = record_value
+    return render(request, 'record/analysis.html', account)
