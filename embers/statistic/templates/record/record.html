@@ -12,11 +12,17 @@
 
      <section class="pb-0">
         <div class="container">
-            <div class="p-0 text-dark rounded bg-white">
-            <a href="{% url 'statistic:analysis'%}" class="btn btn-primary " style="float: right">analysis</a>
-               
-                <h1 class="h2">Record</h1>   
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Record</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'sim_trade:table'%}" class="btn btn-primary btn-sm" style="float: left">back</a>
+                </div>
+            </div>
+            <div class="table-responsive p-0 text-dark rounded bg-white">
+                
+                 <a href="{% url 'statistic:analysis'%}" class="btn btn-primary btn-sm" style="float: left">analysis</a>
                 <table id="table" 
+                    data-search="true"
                     data-toolbar="#toolbar" 
                     data-toggle="table" 
                     data-pagination="true">
@@ -46,9 +52,9 @@
                         {% endfor %}
                     </tbody>              
                 </table>
-             
+            
             </div>
-    
+            
         </div>
         
     </section>

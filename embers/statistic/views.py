@@ -40,14 +40,14 @@ def analysis(request):
     if not uid:
         return redirect("/login/")
     record_account = sim_models.Owned.objects.filter(user_id=uid).values()
-    
+    total_value = 0
     record_value = []
     for e in record_account:
        
         value = {}
 
         value['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
-
+        
         value['unit'] = e['quantity']
         value['owned_value'] = e['avg_price'] * e['quantity']
         value['current_value'] = stock_models.Stock.objects.get(id= e['stock_id']).price * e['quantity']
@@ -61,9 +61,8 @@ def analysis(request):
 
         value['owned_value'] = float(value['owned_value'])
         value['current_value'] = float(value['current_value'])
-    
+        total_value +=  value['owned_value']
         record_value.append(value)
-    account = {}
-    
-    account['account'] = record_value
-    return render(request, 'record/analysis.html', account)
+    value_thr = total_value * 0.01
+
+    return render(request, 'record/analysis.html', {'account': record_value, 'value_thr': value_thr})

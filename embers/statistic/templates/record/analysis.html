@@ -9,10 +9,13 @@
 
     <section class= "pd-0">
         <div class= "container">
-
-            <div class="p-0 text-dark rounded bg-white">
-                
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">statistic</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'sim_trade:table'%}" class="btn btn-primary btn-sm" style="float: left">back</a>
+                </div>
+            </div>
+            <div class="p-0 text-dark rounded bg-white">
                 <div id="chart" style="width: 1150px;height:600px;"></div>
                 <div id="bar" style="width: 1000px;height:600px;margin: 0 auto"></div>
                 <div id="bar_diff" style="width: 1000px;height:600px;margin: 0 auto"></div>
@@ -30,6 +33,46 @@
 <script type="text/javascript" src="{% static 'js/echarts-en.min.js' %}"></script>
     <script type="text/javascript">
         var account = {{ account| safe}};
+        console.log(account); 
+        var thr = {{ value_thr|safe}};
+        var len = account.length;
+        var others;
+        console.log(thr); 
+        if (len > 4) {
+            others = unit_function(account, thr);
+        }
+        else {
+            others = account.sort(function(a, b){return b.owned_value - a.owned_value}); 
+        };
+        
+        function unit_function(account, thr) {
+           
+            account = account.sort(function(a, b){return a.owned_value - b.owned_value});     
+            var others = {'stockname': 'others', 'unit': 0, 'owned_value': 0, 'current_value': 0, 'loss': 0, 'profit': 0};
+            var new_account = [];
+            var i;
+            var len = account.length;
+            for (i = 0; i < len; i++) {
+                var e = account.pop(); 
+                console.log(e.owned_value);
+                if (e.owned_value >= thr) {
+                     new_account.push(e);
+                    
+                } else {
+                    others.unit = others.unit + e.unit;
+                    others.owned_value = others.owned_value + e.owned_value;
+                    others.current_value = others.current_value + e.current_value;
+                    others.loss = others.loss + e.loss;
+                    others.profit = others.profit + e.profit; 
+                };
+            };
+            
+            new_account.push(others);
+            return new_account;  
+            
+        };   
+            
+
 
         var myChart = echarts.init(document.getElementById('chart'));
         
@@ -41,11 +84,13 @@
              
             legend: {
                 type: 'scroll',
-                orient: 'vertical',
-                left: 'right',
+                
+                right: 'center',
+                bottom: '10%',
+                orient: 'horizontal'
             },
             dataset: {
-                source: account
+                source: others
             },
             title: [{
                 text: 'the total owned stock',
@@ -107,7 +152,7 @@
                 dataset: {
                     
                     dimensions: ['stockname', 'owned_value', 'current_value'],
-                    source: account
+                    source: others
                 },
                 yAxis: {type: 'category'},
                 xAxis: {},
@@ -142,7 +187,7 @@
                 dataset: {
                     
                     dimensions: ['stockname', 'profit','loss'],
-                    source: account
+                    source: others
                 },
                 yAxis: {type: 'category'},
                 xAxis: {},
