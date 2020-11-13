@@ -16,7 +16,7 @@ def stock(request, offset):
         stockItem = getStockQuote(offset)
         detailItem = getStockDetail(offset)
     except Exception as e:
-        return render(request, 'detail.html', {'error':True})
+        return render(request, 'error.html', {'message':e.args[0]})
 
     return render(request, 'detail.html', {"stock": detailItem, 'price': stockItem})
 
@@ -61,12 +61,12 @@ def getStockQuote(symbol):
         quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
 
         if quote.status_code != 200:  # fail to get data
-            raise Exception
+            raise Exception('Connect time out!')
 
         quote = json.loads(quote.text)  # convert data from json to dict
 
         if quote['t'] == 0:  # the api return a null dict
-            raise Exception
+            raise Exception('No stock found!')
         # store it to the local
         stockItem = Stock.objects.create(
             symbol=symbol,
@@ -77,7 +77,6 @@ def getStockQuote(symbol):
             low=float(quote['l']),
             updateAt=datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
         )
-        getStockDetail(symbol)
         return stockItem
 
 
@@ -93,7 +92,7 @@ def getStockDetail(symbol):
         info = requests.get('https://finnhub.io/api/v1/stock/profile2?symbol=' + symbol + '&token=' + token)
 
         if info.status_code != 200:
-            raise Exception
+            raise Exception('Connect time out!')
         # convert company info from json to dict
         info = json.loads(info.text)
         # get the candle json file
@@ -101,7 +100,7 @@ def getStockDetail(symbol):
         lastTime = nowTime - 31622400
         candle = requests.get('https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,lastTime,nowTime,token))
         if candle.status_code != 200:
-            raise Exception
+            raise Exception('No company info found!')
         # convert candle from json to dict
         candle = json.loads(candle.text)
         # convert candle structure to chart form
@@ -147,12 +146,6 @@ def getStockDetail(symbol):
             industry=info['finnhubIndustry'],
         )
         return detailItem
-
-def sim_trade_stock(request):
-    if request.method == 'POST':
-        stock_code = request.POST.get('stock_code').upper()
-
-
 
 def search(request, offset):
     try:
