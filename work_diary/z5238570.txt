@@ -15,3 +15,7 @@ Week06
 I built the record webpage to represent the history of user sim-trade.
 Week07
 I started to build the statistic webpage which will show the detail about the user's account.
+Week08
+I added some functionalities to show the data of user's account.
+Week09
+I improved the appearance of statistic webpage.
