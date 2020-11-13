@@ -3,16 +3,6 @@
 
 {% block content %}
 
-<!--Yiren 的 sim_trade/stock 在下面-->
-<!--<script>-->
-<!--    $(document).ready(function () {-->
-<!--            $('[data-toggle="tooltip"]').tooltip();-->
-<!--        });-->
-<!--        -->
-<!--    function follow_stock(){-->
-<!--      var symbol = {{ company_info.ticker }};-->
-<!--    }-->
-<!--</script>-->
 
     <section class="bg-primary-3 text-white" id="exist_stock">
       <div class="container">
@@ -44,25 +34,6 @@
                 <h5>high price today: ${{ stock.h }}</h5>
 
                 <a href="{% url 'stock:stock' company_info.ticker %}" class="lead">Check more</a>
-
-{#                <div class="accordion" id="more_about_stock">#}
-{#                  <button class="btn btn-link" type="button" data-toggle="collapse"#}
-{#                          data-target="#collapse_more_about" aria-expanded="false" aria-controls="collapse_more_about">#}
-{#                    Check more#}
-{#                  </button>#}
-{#                </div>#}
-{##}
-{#                <div id="collapse_more_about" class="collapse" aria-labelledby="more_about_stock">#}
-{#                    <p>Country: {{ company_info.country }}</p>#}
-{#                    <p>Currency: {{ company_info.currency }}</p>#}
-{#                    <p>Exchange: {{ company_info.exchange }}</p>#}
-{#                    <p>Industry: {{ company_info.finnhubIndustry }}</p>#}
-{#                    <p>Share: ${{ company_info.shareOutstanding }}</p>#}
-{#                    <p>IPO date: {{ company_info.ipo }}</p>#}
-{#                    <p>Phone: {{ company_info.phone }}</p>#}
-{#                    <p>Website: {{ company_info.weburl }}</p>#}
-{#                </div>#}
-
                 {% if request.session.user_id %}
                 <div class="card-body text-center">
                     <form action="{% url 'sim_trade:post_follow' company_info.ticker %}" method="post">

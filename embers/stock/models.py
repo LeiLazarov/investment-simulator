@@ -34,3 +34,13 @@ class Detail(models.Model):
 
     def __str__(self):
         return 'Detail_' + self.symbol
+
+class Symbol(models.Model):
+    id = models.AutoField(primary_key=True)  # The unique id for our project
+    symbol = models.CharField(null=False, max_length=16)  # Company symbol/ticker as used on the listed exchange.
+    cmpname = models.CharField(null=False, max_length=32)  # Company name
+
+    def __str__(self):
+        return 'Symbol_' + self.symbol
+
+

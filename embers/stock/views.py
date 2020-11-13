@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from django.utils.timezone import utc
 import json
 import time
+import os
 
 from embers import settings
-from stock.models import Stock, Detail
+from stock.models import Stock, Detail, Symbol
 
 
 def stock(request, offset):
@@ -15,6 +16,7 @@ def stock(request, offset):
         offset = offset.upper() # convert to upper char
         stockItem = getStockQuote(offset)
         detailItem = getStockDetail(offset)
+        getCandle(offset)
     except Exception as e:
         return render(request, 'error.html', {'message':e.args[0]})
 
@@ -29,32 +31,6 @@ def getStockQuote(symbol):
 
     if stockFilter.exists(): # local contains
         stockItem = stockFilter.first()
-        # if the update time > 10 min, update it from API
-        now = datetime.utcnow().replace(tzinfo=utc)
-        u_time = stockItem.updateAt
-        if u_time + timedelta(minutes=10) < now:
-            # get data
-            quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
-
-            if quote.status_code != 200:  # fail to get data
-                return stockItem
-
-            quote = json.loads(quote.text)  # convert data from json to dict
-
-            if quote['t'] == 0:  # the api return a null dict
-                return stockItem
-
-            if quote['t'] == int(time.mktime(stockItem.updateAt.timetuple())): # no need to update
-                return stockItem
-
-            stockItem.price=quote['c']
-            stockItem.open=quote['o']
-            stockItem.close=quote['pc']
-            stockItem.high=quote['h']
-            stockItem.low=quote['l']
-            stockItem.updateAt = datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
-            stockItem.save()
-
         return stockItem
     else:  # get it from API and store in the local
         # get data
@@ -95,10 +71,39 @@ def getStockDetail(symbol):
             raise Exception('Connect time out!')
         # convert company info from json to dict
         info = json.loads(info.text)
+
+        # store company info to local
+        stock = models.Stock.objects.get(symbol=symbol)
+        detailItem = Detail.objects.create(
+            stock=stock,
+            symbol=symbol,
+            country=info['country'],
+            currency=info['currency'],
+            exchange=info['exchange'],
+            phone=info['phone'],
+            ipo=info['ipo'],
+            marketCapitalization=info['marketCapitalization'],
+            shareOutstanding=info['shareOutstanding'],
+            cmpname=info['name'],
+            weburl=info['weburl'],
+            logo=info['logo'],
+            industry=info['finnhubIndustry'],
+        )
+        return detailItem
+
+def getCandle(symbol):
+    # store canverted json file
+    file_path = settings.MEDIA_ROOT + '\candles\\' + symbol + '.json'
+    if not os.path.exists(file_path):
+        token = 'buch32v48v6t51vholng'
         # get the candle json file
         nowTime = int(time.time())
-        lastTime = nowTime - 31622400
-        candle = requests.get('https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,lastTime,nowTime,token))
+        lastTime = nowTime - 2592000  # to last month
+        candle = requests.get(
+            'https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,
+                                                                                                              lastTime,
+                                                                                                              nowTime,
+                                                                                                              token))
         if candle.status_code != 200:
             raise Exception('No company info found!')
         # convert candle from json to dict
@@ -123,29 +128,9 @@ def getStockDetail(symbol):
             else:
                 volumes.append(-1)
             result['volumes'].append(volumes)
-        # store canverted json file
-        url = '\candles\\' + symbol + '.json'
-        path = settings.MEDIA_ROOT + url
-        with open(path, 'w') as f:
+
+        with open(file_path, 'w') as f:
             json.dump(result, f)
-        # store company info to local
-        stock = models.Stock.objects.get(symbol=symbol)
-        detailItem = Detail.objects.create(
-            stock=stock,
-            symbol=symbol,
-            country=info['country'],
-            currency=info['currency'],
-            exchange=info['exchange'],
-            phone=info['phone'],
-            ipo=info['ipo'],
-            marketCapitalization=info['marketCapitalization'],
-            shareOutstanding=info['shareOutstanding'],
-            cmpname=info['name'],
-            weburl=info['weburl'],
-            logo=info['logo'],
-            industry=info['finnhubIndustry'],
-        )
-        return detailItem
 
 def search(request, offset):
     try:

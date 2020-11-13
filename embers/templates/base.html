@@ -59,7 +59,8 @@
                         <input type="text" class="form-control" placeholder="Stock symbol"
                                aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" id="button-search" onclick="searchSym()"><img
+                            <button class="btn btn-outline-secondary" type="button" id="button-search"
+                                    onclick="searchSym()"><img
                                     class="icon icon-sm" data-inject-svg
                                     src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
                         </div>
@@ -93,6 +94,16 @@
                                href="{% url 'contact_us' %}" role="button">Contact us</a>
                         </li>
                     </ul>
+                    <div class="input-group w-25">
+                        <input type="text" class="form-control" placeholder="Stock symbol"
+                               aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="button-search"
+                                    onclick="searchSym()"><img
+                                    class="icon icon-sm" data-inject-svg
+                                    src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
 
@@ -313,9 +324,9 @@
 {% block script_content %}
 {% endblock %}
 <script>
-    function searchSym(){
+    function searchSym() {
         var sym = $("#symText").val()
-        window.location.href = "/search/"+sym;
+        window.location.href = "/search/" + sym;
     }
 
 

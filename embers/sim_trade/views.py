@@ -1,16 +1,18 @@
 import requests
 from django.shortcuts import render, redirect
 from django.db import models
-from stock.models import Stock
+from stock.models import Stock, Symbol
 from login.models import User
 from watchlist.models import WatchList
+from sim_trade.models import Owned, Record
 import json
 from django.http import HttpResponse
 from django.core.serializers import serialize
 from decimal import *
 from stock.views import getStockQuote
 import datetime
-from sim_trade.models import Owned, Record
+
+
 
 # Create your views here.
 
@@ -66,12 +68,12 @@ def table(request):
     stats = refreshStat(uid)
     acc = {'a': "${:,}".format(stats[0]), 'c': "${:,}".format(stats[1])
         , 's': "${:,}".format(stats[2]), 'e': "${:,}".format(stats[3])
-        , 'cv':str(stats[1]),'sv':str(stats[2]),'ev':str(stats[3])}
+        , 'cv': str(stats[1]), 'sv': str(stats[2]), 'ev': str(stats[3])}
 
     # owned stock part
     owned_list = Owned.objects.filter(user_id=uid)
 
-    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
+    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list': owned_list})
 
 
 def checkStock(request, offset):
@@ -79,12 +81,13 @@ def checkStock(request, offset):
         stockItem = getStockQuote(offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
-            res['name']=stockItem.detail.cmpname
-            res['type']='success'
+            symItem = Symbol.objects.get(symbol=stockItem.symbol)
+            res['name'] = symItem.cmpname
+            res['type'] = 'success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
-    return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
+    return HttpResponse({'type': 'error'}, content_type="application/json")
 
 
 def sellCheckStock(request, offset):
@@ -92,16 +95,17 @@ def sellCheckStock(request, offset):
     try:
         stockItem = getStockQuote(offset.upper())
         if stockItem:
-            ownStock = Owned.objects.get(user_id=uid,stock=stockItem)
+            ownStock = Owned.objects.get(user_id=uid, stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
-            res['name'] = stockItem.detail.cmpname
+            symItem = Symbol.objects.get(symbol=stockItem.symbol)
+            res['name'] = symItem.cmpname
             res['avgp'] = float(ownStock.avg_price)
-            res['type']='success'
+            res['type'] = 'success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
-    return HttpResponse({'type':'error'}, content_type="application/json")
+        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
+    return HttpResponse({'type': 'error'}, content_type="application/json")
 
 
 def getOwned(request):
@@ -111,12 +115,13 @@ def getOwned(request):
         res = json.loads(serialize('json', queryset))
         data = []
         for row in res:
-            row['fields']['values']="${:,}".format(int(row['fields']['quantity'])*Decimal(row['fields']['avg_price']))
+            row['fields']['values'] = "${:,}".format(
+                int(row['fields']['quantity']) * Decimal(row['fields']['avg_price']))
             row['fields']['id'] = row['pk']
             row['fields']['symbol'] = Stock.objects.get(pk=row['fields']['stock']).symbol
             data.append(row['fields'])
     except Exception as e:
-        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
+        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
@@ -156,7 +161,7 @@ def buy_stock(request):
                 max_price=s_price,
             )
         # reduce cash
-        user.cash -=s_price*s_num
+        user.cash -= s_price * s_num
         user.save()
 
         # record this to list
@@ -197,7 +202,7 @@ def sell_stock(request):
         else:
             raise Exception
         # increase cash
-        user.cash +=s_price*s_num
+        user.cash += s_price * s_num
         user.save()
 
         # record this to list
@@ -210,7 +215,7 @@ def sell_stock(request):
         )
 
     except Exception as e:
-        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
+        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
     ret['type'] = 'success'
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
@@ -221,9 +226,7 @@ def refreshStat(uid):
     ownStocks = Owned.objects.filter(user=user)
     stockValue = Decimal(0)
     for ss in ownStocks:
-        stockValue+= ss.quantity * ss.stock.price
+        stockValue += ss.quantity * ss.stock.price
 
     # account value, cash, stock value, earning
-    return [stockValue+user.cash, user.cash, stockValue, stockValue+user.cash-user.init]
-
-
+    return [stockValue + user.cash, user.cash, stockValue, stockValue + user.cash - user.init]
