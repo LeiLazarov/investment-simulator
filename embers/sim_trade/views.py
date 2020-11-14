@@ -79,14 +79,27 @@ def post_follow(request, sym):
             # 该symbol已经被此用户follow，执行“提示”
             message = "The stock is already in your list."
             # return render(request, '/search/%s/' % sym, {'message': message})
-            return redirect('/search/%s/' % sym)
+            return HttpResponse(json.dumps({'type': 'error', 'message': message}), content_type="application/json")
         else:
             # 该symbol未被此用户follow，执行“添加”
             item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
             WatchList(symbol=sym, user=item_id).save()  # 再把外键作为WatchList的键，进行添加save
-            return redirect('/watchlist/')
+            return HttpResponse(json.dumps({'type': 'success'}), content_type="application/json")
     except Exception as e:
-        return render(request, 'error.html', {'message': e.args[0]})
+        return HttpResponse(json.dumps({'type': 'error', 'message': e.args[0]}), content_type="application/json")
+
+
+def checkStock(request, offset):
+    try:
+        stockItem = getStockQuote(offset.upper())
+        if stockItem:
+            res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
+            res['name']=stockItem.detail.cmpname
+            res['type']='success'
+            return HttpResponse(json.dumps(res), content_type="application/json")
+    except Exception as e:
+        return HttpResponse(json.dumps({'type':'error', 'message': e.args[0]}), content_type="application/json")
+    return HttpResponse(json.dumps({'type':'error'}), content_type="application/json")
 
 
 def table(request):
