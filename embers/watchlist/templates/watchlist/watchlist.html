@@ -30,22 +30,17 @@
                     </div>
                     {% for stock in my_watchlist %}
                         <div class="mb-3 mb-sm-4">
-                            <div class="card card-body flex-md-row align-items-start align-items-md-center hover-box-shadow" data-intro='Each card shows the latest information of the stock you interested in.' data-step='1'>
+                            <div class="card flex-md-row align-items-start align-items-md-center hover-box-shadow" data-intro='Each card shows the latest information of the stock you interested in.' data-step='1'>
                                 <div style="width: 100%;">
-                                    <p><a href="{% url 'stock:stock' stock.symbol %}" data-intro='Click stock code to view more details(a graph showing the historical daily closing unit price for the stock).' data-step='2'>Stock Code: {{ stock.symbol}}</a></p>
-                                    <div style="margin-bottom: 1%; margin-top: 1%">
-                                        <span >Current Price: ${{ stock.stock_quote.c }} per unit</span>
+                                    <div class="card-header bg-primary-3">
+                                        <a href='/stock/{{stock.symbol}}' title='View detail' target='_blank' data-intro='Click stock code to view more details(a graph showing the historical daily closing unit price for the stock).' data-step='2'>Stock Code: {{stock.symbol}}</a>
                                     </div>
-                                    <p data-intro='This percentage change compares the latest stock unit price to the stock unit price yesterday.' data-step='3'>Percentage Change: {{ stock.stock_quote.res }}%</p>
-                                    <div>
-                                    <p class="card-text" style="float: left">{{ stock.createdAt }}</p>
-                                    </div>
-                                    <form  action="{% url 'watchlist:delete' stock.symbol %}" method="post">
-                                        {% csrf_token %}
-                                            <button class="btn btn-primary btn-sm" type="submit" style="float: right; margin-left: 12%;" data-intro='Delete the stock you are no longer interested in.' data-step='4'>
-                                                <span>Remove</span>
-                                            </button>
-                                    </form>
+                                    <div class="card-body">
+                                        <div class="card-text" style=" margin-top: 1%; margin-bottom: 1%">Current Price: ${{ stock.c }} per unit</div>
+                                        <p class="card-text" data-intro='This percentage change compares the latest stock unit price to the stock unit price yesterday.' data-step='3'>Percentage Change: {{ stock.res }}%</p>
+                                        <div class="card-text" style="float: left" data-intro='This is the date the stock was added to the watchlist.' data-step='4'>{{ stock.createdAt }}</div>
+                                        <button class="btn btn-danger btn-sm" style="float: right" data-toggle="modal" data-target="#myModal" onClick="deleteurl('/delete/?delete_id={{stock.symbol}}')">Remove</button>
+                                    </div>                                            
                                 </div>
                             </div>
                         </div>
@@ -86,9 +81,44 @@
             </div>
         </div>
     </section>
-
+    
+    <div class="modal fade" style="position: fixed;z-index: 999999;max-width: 1000px; left: 270px; top:300px;" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+		        <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					    x
+	                </button>
+				    <h4 class="modal-title" id="myModalLabel">
+	                    Remove it from your watchlist
+		            </h4>
+                </div>
+			    <div class="modal-body">
+	                Are you sure you want to remove this stock from your watchlist?
+                </div>
+			    <div class="modal-footer">
+                    <input type="hidden" id="url"/>
+                    <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close
+				    </button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="urlSubmit()">
+		                Confirm
+                    </button>
+			    </div>
+		    </div>
+	    </div>
+    </div>
 {% endblock %}
 
 {% block script_content %}
+    <script>
+        function deleteurl(url){
+             $('#url').val(url);
+        }
+
+        function urlSubmit(){ 
+            var url=$.trim($("#url").val());
+            window.location.href=url;   
+        }
+    </script>
 
 {% endblock %}
