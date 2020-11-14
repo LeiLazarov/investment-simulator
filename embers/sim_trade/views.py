@@ -1,18 +1,17 @@
 import requests
 from django.shortcuts import render, redirect
 from django.db import models
-from stock.models import Stock, Symbol
+from stock.models import Stock, Detail
 from login.models import User
 from watchlist.models import WatchList
-from sim_trade.models import Owned, Record
 import json
 from django.http import HttpResponse
 from django.core.serializers import serialize
 from decimal import *
 from stock.views import getStockQuote
 import datetime
-
-
+from sim_trade.models import Owned, Record
+from django.db.models import Q
 
 # Create your views here.
 
@@ -38,26 +37,56 @@ def sim_trade_stock(request):
             not_found_msg = "The stock might not exist!"
             return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
 
-        return render(request, 'sim_trade/stock.html',
+        return render(request, 'sim_trade/result.html',
                       {'stock': stock_quote.json(), 'company_info': company_info.json()})
+
+'''
+def new_search(request):
+    # 先从数据库里查询有无该symbol
+    if request.method == 'POST':
+        stocks_list = []  # 存所有查询到的可能的stocks
+        stock_code = request.POST.get('stock_code').upper() # 这里的stock_code可能是code也可能是公司名称之类,模糊查
+        stocks = models.Detail.objects.filter(symbol=stock_code | Q(cmpname__contains=stock_code))
+        if stocks.exists():  # 已经在数据库里查到stock, 去拿stock_quote和company_info
+            for stock in stocks:    # 转成stock_quote， company_info
+                print(stock)    # 暂时不知道数据库里record拿出来的形式
+                stocks_list.append(stock)
+        # 数据库没有的话，调用API，只会查到一个结果
+        else:
+            stock_quote = requests.get(
+                'https://finnhub.io/api/v1/quote?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug')
+            company_info = requests.get(
+                'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug'
+            )
+            stocks_list.append([stock_quote, company_info]) # 这时，这个list里只有api的这一个结果
+
+        # 数据库和API都没有的话， stocks_list[[{},{}]]里第一个元素里两个元素都是API返回的空
+        if len(stocks_list[0][0]) == 0:
+            not_found_msg = "The stock might not exist!"
+            return render(request, 'sim_trade/result.html', {'not_found_msg': not_found_msg})
+        # 把stocks_list[stock_quote， company_info]传到stock.html
+        return render(request, 'sim_trade/result.html', {'stocks_list': json.dump(stocks_list)})
+    else:
+        raise Exception
+'''
 
 
 def post_follow(request, sym):
     # 通过stock.html里的“Follow”按钮拿到了company_info.ticker, 通过url传递过来
-    if request.method == 'POST':
+    try:
         user_id = request.session.get('user_id', '')
         if WatchList.objects.filter(symbol=sym, user=user_id):
             # 该symbol已经被此用户follow，执行“提示”
-            # models.WatchList.objects.filter(user=1, symbol=sym).delete()
-            not_found_msg = "The stock is already in your list"
-            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
+            message = "The stock is already in your list."
+            # return render(request, '/search/%s/' % sym, {'message': message})
+            return redirect('/search/%s/' % sym)
         else:
             # 该symbol未被此用户follow，执行“添加”
             item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
             WatchList(symbol=sym, user=item_id).save()  # 再把外键作为WatchList的键，进行添加save
             return redirect('/watchlist/')
-    else:
-        raise Exception
+    except Exception as e:
+        return render(request, 'error.html', {'message': e.args[0]})
 
 
 def table(request):
@@ -68,12 +97,12 @@ def table(request):
     stats = refreshStat(uid)
     acc = {'a': "${:,}".format(stats[0]), 'c': "${:,}".format(stats[1])
         , 's': "${:,}".format(stats[2]), 'e': "${:,}".format(stats[3])
-        , 'cv': str(stats[1]), 'sv': str(stats[2]), 'ev': str(stats[3])}
+        , 'cv':str(stats[1]),'sv':str(stats[2]),'ev':str(stats[3])}
 
     # owned stock part
     owned_list = Owned.objects.filter(user_id=uid)
 
-    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list': owned_list})
+    return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
 
 
 def checkStock(request, offset):
@@ -81,13 +110,12 @@ def checkStock(request, offset):
         stockItem = getStockQuote(offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
-            symItem = Symbol.objects.get(symbol=stockItem.symbol)
-            res['name'] = symItem.cmpname
-            res['type'] = 'success'
+            res['name']=stockItem.detail.cmpname
+            res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
-    return HttpResponse({'type': 'error'}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
+    return HttpResponse({'type':'error'}, content_type="application/json")
 
 
 def sellCheckStock(request, offset):
@@ -95,17 +123,16 @@ def sellCheckStock(request, offset):
     try:
         stockItem = getStockQuote(offset.upper())
         if stockItem:
-            ownStock = Owned.objects.get(user_id=uid, stock=stockItem)
+            ownStock = Owned.objects.get(user_id=uid,stock=stockItem)
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
             res['volume'] = ownStock.quantity
-            symItem = Symbol.objects.get(symbol=stockItem.symbol)
-            res['name'] = symItem.cmpname
+            res['name'] = stockItem.detail.cmpname
             res['avgp'] = float(ownStock.avg_price)
-            res['type'] = 'success'
+            res['type']='success'
             return HttpResponse(json.dumps(res), content_type="application/json")
     except Exception as e:
-        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
-    return HttpResponse({'type': 'error'}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
+    return HttpResponse({'type':'error'}, content_type="application/json")
 
 
 def getOwned(request):
@@ -115,13 +142,12 @@ def getOwned(request):
         res = json.loads(serialize('json', queryset))
         data = []
         for row in res:
-            row['fields']['values'] = "${:,}".format(
-                int(row['fields']['quantity']) * Decimal(row['fields']['avg_price']))
+            row['fields']['values']="${:,}".format(int(row['fields']['quantity'])*Decimal(row['fields']['avg_price']))
             row['fields']['id'] = row['pk']
             row['fields']['symbol'] = Stock.objects.get(pk=row['fields']['stock']).symbol
             data.append(row['fields'])
     except Exception as e:
-        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
@@ -161,7 +187,7 @@ def buy_stock(request):
                 max_price=s_price,
             )
         # reduce cash
-        user.cash -= s_price * s_num
+        user.cash -=s_price*s_num
         user.save()
 
         # record this to list
@@ -202,7 +228,7 @@ def sell_stock(request):
         else:
             raise Exception
         # increase cash
-        user.cash += s_price * s_num
+        user.cash +=s_price*s_num
         user.save()
 
         # record this to list
@@ -215,7 +241,7 @@ def sell_stock(request):
         )
 
     except Exception as e:
-        return HttpResponse({'type': 'error', 'message': e.args[0]}, content_type="application/json")
+        return HttpResponse({'type':'error', 'message': e.args[0]}, content_type="application/json")
     ret['type'] = 'success'
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
@@ -226,7 +252,9 @@ def refreshStat(uid):
     ownStocks = Owned.objects.filter(user=user)
     stockValue = Decimal(0)
     for ss in ownStocks:
-        stockValue += ss.quantity * ss.stock.price
+        stockValue+= ss.quantity * ss.stock.price
 
     # account value, cash, stock value, earning
-    return [stockValue + user.cash, user.cash, stockValue, stockValue + user.cash - user.init]
+    return [stockValue+user.cash, user.cash, stockValue, stockValue+user.cash-user.init]
+
+
