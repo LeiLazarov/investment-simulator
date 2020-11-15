@@ -16,8 +16,11 @@
                 </div>
             </div>
             <div class="p-0 text-dark rounded bg-white">
+                {# show the pie chart of total unit and total paid value #}
                 <div id="chart" style="width: 1150px;height:600px;"></div>
+                {# show the bar chart of owned stock #}
                 <div id="bar" style="width: 1000px;height:600px;margin: 0 auto"></div>
+                {# show the bar chart of profit and loss #}
                 <div id="bar_diff" style="width: 1000px;height:600px;margin: 0 auto"></div>
             </div>
        </div>
@@ -33,11 +36,11 @@
 <script type="text/javascript" src="{% static 'js/echarts-en.min.js' %}"></script>
     <script type="text/javascript">
         var account = {{ account| safe}};
-        console.log(account); 
+        
         var thr = {{ value_thr|safe}};
         var len = account.length;
         var others;
-        console.log(thr); 
+         
         if (len > 4) {
             others = unit_function(account, thr);
         }
@@ -54,7 +57,7 @@
             var len = account.length;
             for (i = 0; i < len; i++) {
                 var e = account.pop(); 
-                console.log(e.owned_value);
+               
                 if (e.owned_value >= thr) {
                      new_account.push(e);
                     
@@ -163,7 +166,6 @@
                 ]
             };
 
-        // 
         myBar.setOption(option);
 
         var myBar_diff = echarts.init(document.getElementById('bar_diff'));
@@ -203,7 +205,7 @@
                 ]
             };
 
-        // 
+    
         myBar_diff.setOption(option_diff);
 
      </script>
