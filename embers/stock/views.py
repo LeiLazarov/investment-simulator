@@ -12,6 +12,7 @@ from embers import settings
 from stock.models import Stock, Detail, Symbol
 from watchlist.models import WatchList, User
 from django.db.models import Q
+from decimal import *
 
 def stock(request, offset):
     try:
@@ -143,7 +144,7 @@ def getCandle(symbol):
 
 
 def search(request, offset):
-    try:
+
         offset = offset.upper() # convert to upper char
         stocks_list = []  # save query results
         stock_code = offset
@@ -153,13 +154,16 @@ def search(request, offset):
         if stocks.exists():
             for one_stock in stocks:
                 stockItem = {}  # define the format to transfer
-                quote_res = getStockQuote(one_stock.symbol)
+                try:
+                    quote_res = getStockQuote(one_stock.symbol)
+                except Exception as e:
+                    continue
                 # include info
                 stockItem['symbol'] = one_stock.symbol
                 stockItem['name'] = one_stock.cmpname
                 stockItem['price'] = quote_res.price
                 stockItem['close'] = quote_res.close
-                stockItem['chg'] = quote_res.price - quote_res.close
+                stockItem['chg'] = round(quote_res.price - quote_res.close,2)
                 stockItem['res'] = "{:.3f}".format((stockItem['chg']) * 100 / stockItem['close'])
                 stockItem['date'] = quote_res.updateAt
                 stocks_list.append(stockItem)
@@ -170,8 +174,7 @@ def search(request, offset):
             message = "stock might not exist"
             return render(request, 'result.html', {'message': message}) # not found message
 
-    except Exception as e:
-        return render(request, 'error.html', {'message': e.args[0]})
+
 
 
 def post_follow(request, sym):

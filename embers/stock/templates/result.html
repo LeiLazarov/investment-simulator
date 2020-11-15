@@ -136,6 +136,7 @@
         function follow_stock(symbol) {
             if (symbol != "") {
                 var url = '/post_follow/' + symbol;
+                $('#fc-button').attr("disabled", true);
                 $.get(url, function (rawData) {
                     if (rawData['type'] == 'success') {
                         $('#follow_tip').addClass('alert-success');
@@ -144,12 +145,10 @@
                         setTimeout(function () {
                             window.location.href = '/watchlist';
                         }, 3000);
-
                     } else {
                         $('#follow_tip').addClass('alert-danger');
                         $('#follow_tip').text(rawData['message']);
                         $('#follow_tip').removeClass('d-none');
-                        $('#fc-button').attr("disabled", true);
                         $('#' + symbol).attr("disabled", true);
                     }
                 });
