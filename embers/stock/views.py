@@ -145,16 +145,18 @@ def getCandle(symbol):
 def search(request, offset):
     try:
         offset = offset.upper() # convert to upper char
-        stocks_list = []  # save query results
+        stocks_list = []  # 存所有查询到的可能的stocks
+        # stock_code = request.POST.get('stock_code').upper()  # 这里的stock_code可能是code也可能是公司名称之类,模糊查
         stock_code = offset
-        # fuzzy query, symbol or company name
+        # 如果这里写symbol=code，不模糊查询的话，只要触发就返回结果了；换句话说，只能拿到一个stock
         stocks = models.Symbol.objects.filter(Q(symbol__contains=stock_code) | Q(cmpname__contains=stock_code))[:9]
-        # if already exist in DB
+        # 已经在数据库里查到stock, 去拿symbol和company_name
         if stocks.exists():
             for one_stock in stocks:
-                stockItem = {}  # define the format to transfer
+                # 数据库里record拿出来的形式，是model
+                stockItem = {}
                 quote_res = getStockQuote(one_stock.symbol)
-                # include info
+
                 stockItem['symbol'] = one_stock.symbol
                 stockItem['name'] = one_stock.cmpname
                 stockItem['price'] = quote_res.price
@@ -163,36 +165,30 @@ def search(request, offset):
                 stockItem['res'] = "{:.3f}".format((stockItem['chg']) * 100 / stockItem['close'])
                 stockItem['date'] = quote_res.updateAt
                 stocks_list.append(stockItem)
-            # transmit stock_list to result.html
+
             return render(request, 'result.html', {'stocks_list': stocks_list})
 
         else:
             message = "stock might not exist"
-            return render(request, 'result.html', {'message': message}) # not found message
+            return render(request, 'result.html', {'message': message})
 
     except Exception as e:
         return render(request, 'error.html', {'message': e.args[0]})
 
-
 def post_follow(request, sym):
-    # already get sym as url from JS
+    # 通过stock.html里的“Follow”按钮拿到了company_info.ticker, 通过url传递过来
     try:
-        # if user is login
         user_id = request.session.get('user_id', '')
         if WatchList.objects.filter(symbol=sym, user=user_id):
-            # symbol has been followed
+            # 该symbol已经被此用户follow，执行“提示”
             message = "The stock is already in your list."
             # return render(request, '/search/%s/' % sym, {'message': message})
-            # response json file includes message
             return HttpResponse(json.dumps({'type': 'error', 'message': message}), content_type="application/json")
         else:
-            # not followed, add to list
-            # WatchList.user is foreign key from User.id, should be instance before use
-            item_id = User.objects.get(id=user_id)
-            # then save in WatchList
-            WatchList(symbol=sym, user=item_id).save()
+            # 该symbol未被此用户follow，执行“添加”
+            item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
+            WatchList(symbol=sym, user=item_id).save()  # 再把外键作为WatchList的键，进行添加save
             return HttpResponse(json.dumps({'type': 'success'}), content_type="application/json")
-
     except Exception as e:
         return HttpResponse(json.dumps({'type': 'error', 'message': e.args[0]}), content_type="application/json")
 
