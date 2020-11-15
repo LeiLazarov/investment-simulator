@@ -22,15 +22,15 @@ def account_record(request):
     record_account = sim_models.Record.objects.filter(user_id=uid).values()
     record_list = []
     
-    for e in record_account:
+    for i in range(len(record_account)):
         record = {}
-        record['id'] = e['id']
-        record['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
-        record['quantity'] = e['quantity']
-        record['price'] = e['price']
-        record['type'] = 'sell' if e['type'] == True else 'buy'
-        record['createdAt'] = e['createdAt']
-        record['stock_value'] = -e['price'] * e['quantity'] if e['type'] == True else e['price'] * e['quantity']
+        record['id'] = i + 1
+        record['stockname'] = stock_models.Stock.objects.get(id= record_account[i]['stock_id']).symbol
+        record['quantity'] = record_account[i]['quantity']
+        record['price'] = record_account[i]['price']
+        record['type'] = 'sell' if record_account[i]['type'] == True else 'buy'
+        record['createdAt'] = record_account[i]['createdAt']
+        record['stock_value'] = -record_account[i]['price'] * record_account[i]['quantity'] if record_account[i]['type'] == True else record_account[i]['price'] * record_account[i]['quantity']
         record_list.append(record)
     
     return render(request, 'record/record.html',{'record': record_list})
