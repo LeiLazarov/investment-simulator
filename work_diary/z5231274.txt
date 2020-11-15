@@ -23,4 +23,4 @@ Week 8
 This week I polished the UI performance and updated the backend implementation method.
 
 Week 9
-Our team discussed our product and started to write report.
+Our team discussed our product and started to write report. Plan to debug our system in this week.

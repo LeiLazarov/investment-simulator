@@ -35,6 +35,13 @@
                 <div class="d-flex align-items-center order-lg-3">
                     <a href="{% url 'login:logout' %}"
                        class="btn btn-danger ml-lg-4 mr-3 mr-md-4 mr-lg-0 d-none d-sm-block order-lg-3">Log out</a>
+                    <button aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                            data-target=".navbar-collapse" data-toggle="collapse" type="button">
+                        <img alt="Navbar Toggler Open Icon" class="navbar-toggler-open icon icon-sm" data-inject-svg
+                             src="{% static 'img/icons/interface/icon-menu.svg' %}">
+                        <img alt="Navbar Toggler Close Icon" class="navbar-toggler-close icon icon-sm" data-inject-svg
+                             src="{% static 'img/icons/interface/icon-x.svg' %}">
+                    </button>
                 </div>
                 <div class="collapse navbar-collapse order-3 order-lg-2 justify-content-lg-end" id="navigation-menu">
                     <ul class="navbar-nav my-3 my-lg-0">
@@ -60,19 +67,23 @@
                                aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="button-search"
-                                    onclick="searchSym()"><img
+                                    onclick="searchSym()" style="background-color: lightgray"><img
                                     class="icon icon-sm" data-inject-svg
                                     src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
                         </div>
                     </div>
                 </div>
             {% else %}
-                {#            Sign in#}
+                {#not Sign in#}
                 <div class="d-flex align-items-center order-lg-3">
                     <a href="{% url 'login:login' %}"
                        class="btn btn-primary ml-lg-4 mr-3 mr-md-4 mr-lg-0 d-none d-sm-block order-lg-3">Sign in</a>
                     <button aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
                             data-target=".navbar-collapse" data-toggle="collapse" type="button">
+                        <img alt="Navbar Toggler Open Icon" class="navbar-toggler-open icon icon-sm" data-inject-svg
+                             src="{% static 'img/icons/interface/icon-menu.svg' %}">
+                        <img alt="Navbar Toggler Close Icon" class="navbar-toggler-close icon icon-sm" data-inject-svg
+                             src="{% static 'img/icons/interface/icon-x.svg' %}">
                     </button>
                 </div>
                 <div class="collapse navbar-collapse order-3 order-lg-2 justify-content-lg-end" id="navigation-menu">
@@ -99,7 +110,7 @@
                                aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="button-search"
-                                    onclick="searchSym()"><img
+                                    onclick="searchSym()" style="background-color: lightgray"><img
                                     class="icon icon-sm" data-inject-svg
                                     src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
                         </div>
@@ -117,7 +128,7 @@
     {% endblock %}
 </div>
 
-<footer class="bg-primary-3 text-white links-white pb-4 footer-1">
+<footer class="bg-primary-4 text-white links-white pb-4 footer-1">
     <div class="container">
         <div class="row">
             <div class="col-xl-auto mr-xl-5 col-md-3 mb-4 mb-md-0">

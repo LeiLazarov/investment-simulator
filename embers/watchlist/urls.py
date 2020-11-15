@@ -14,14 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, re_path
-
+from django.conf.urls import include
 from watchlist import views
 
 app_name = 'watchlist'
 
 urlpatterns = [
-    path('watchlist/', views.watchlist, name='watchlist'),
-    path('watchlist/detail/<int:id>/', views.watchlist_detail, name='watchlist_detail'),
-    re_path(r'watchlist/delete/(.+)/$', views.watchlist_delete, name='delete'),
-    # path('watchlist/delete/', views.watchlist_delete, name='delete'),
+    path('watchlist/', views.watchlist, name = 'watchlist'),
+    # path('watchlist/detail/<int:id>/', views.watchlist_detail, name='watchlist_detail'),
+    #re_path(r'watchlist/delete/(.+)/$', views.watchlist_delete, name='delete'),
+    path('delete/', views.delete, name='delete'),
 ]

@@ -4933,11 +4933,19 @@ button.bg-primary-2:focus {
   background-color: #023735 !important; }
 
 .bg-primary-3 {
-  background-color: #192d35 !important; }
+  background-color: #F7F9FC !important; }
 
 a.bg-primary-3:hover, a.bg-primary-3:focus,
 button.bg-primary-3:hover,
 button.bg-primary-3:focus {
+  background-color: #091012 !important; }
+
+.bg-primary-4 {
+  background-color: #2C3038 !important; }
+
+a.bg-primary-4:hover, a.bg-primary-4:focus,
+button.bg-primary-4:hover,
+button.bg-primary-4:focus {
   background-color: #091012 !important; }
 
 .bg-white {
@@ -5005,6 +5013,9 @@ button.bg-primary-3:focus {
 
 .border-primary-3 {
   border-color: #192d35 !important; }
+
+.border-primary-4 {
+  border-color: #2C3038 !important; }
 
 .border-white {
   border-color: #fff !important; }
@@ -7605,7 +7616,7 @@ a.card {
   background: #555A64; }
 
 .bg-gradient {
-  background: linear-gradient(to right, #009b72, #046865) !important; }
+  background: linear-gradient(to right, #eee, #555) !important; }
 
 .bg-primary-alt {
   background-color: rgba(0, 155, 114, 0.1); }
