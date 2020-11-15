@@ -25,7 +25,6 @@ urlpatterns = [
     # path('sim_trade/<str:symbol>', views.sim_trade, name='sim_trade'),
     path('sim_trade/', views.sim_trade, name='sim_trade'),
     path('sim_trade/stock/', views.sim_trade_stock, name='sim_trade_stock'),
-    re_path(r'sim_trade/post_follow/(.+)/$', views.post_follow, name='post_follow'),
     re_path(r'sim_trade/getOwned/', views.getOwned, name='getOwned'),
     re_path(r'sim_trade/checkStock/(.+)/$', views.checkStock, name='checkStock'),
     re_path(r'sim_trade/sellCheckStock/(.+)/$', views.sellCheckStock, name='sellCheckStock'),

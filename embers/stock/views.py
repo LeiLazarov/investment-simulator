@@ -6,10 +6,12 @@ from django.utils.timezone import utc
 import json
 import time
 import os
+from django.http import HttpResponse
 
 from embers import settings
 from stock.models import Stock, Detail, Symbol
-
+from watchlist.models import WatchList, User
+from django.db.models import Q
 
 def stock(request, offset):
     try:
@@ -112,6 +114,7 @@ def getCandle(symbol):
                                                                                                               token))
         if candle.status_code != 200:
             raise Exception('No company info found!')
+
         # convert candle from json to dict
         candle = json.loads(candle.text)
         # convert candle structure to chart form
@@ -138,22 +141,54 @@ def getCandle(symbol):
         with open(file_path, 'w') as f:
             json.dump(result, f)
 
+
 def search(request, offset):
     try:
         offset = offset.upper() # convert to upper char
-        stock_quote = requests.get(
-            'https://finnhub.io/api/v1/quote?symbol=' + offset + '&token=buajtbf48v6ocn3pc8ug')
-        company_info = requests.get(
-            'https://finnhub.io/api/v1/stock/profile2?symbol=' + offset + '&token=buajtbf48v6ocn3pc8ug'
-        )
+        stocks_list = []  # 存所有查询到的可能的stocks
+        # stock_code = request.POST.get('stock_code').upper()  # 这里的stock_code可能是code也可能是公司名称之类,模糊查
+        stock_code = offset
+        # 如果这里写symbol=code，不模糊查询的话，只要触发就返回结果了；换句话说，只能拿到一个stock
+        stocks = models.Symbol.objects.filter(Q(symbol__contains=stock_code) | Q(cmpname__contains=stock_code))[:9]
+        # 已经在数据库里查到stock, 去拿symbol和company_name
+        if stocks.exists():
+            for one_stock in stocks:
+                # 数据库里record拿出来的形式，是model
+                stockItem = {}
+                quote_res = getStockQuote(one_stock.symbol)
 
-        if len(company_info.json()) == 0:
-            not_found_msg = "The stock might not exist!"
-            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
+                stockItem['symbol'] = one_stock.symbol
+                stockItem['name'] = one_stock.cmpname
+                stockItem['price'] = quote_res.price
+                stockItem['close'] = quote_res.close
+                stockItem['chg'] = quote_res.price - quote_res.close
+                stockItem['res'] = "{:.3f}".format((stockItem['chg']) * 100 / stockItem['close'])
+                stockItem['date'] = quote_res.updateAt
+                stocks_list.append(stockItem)
 
-        return render(request, 'sim_trade/stock.html',
-                      {'stock': stock_quote.json(), 'company_info': company_info.json()})
+            return render(request, 'result.html', {'stocks_list': stocks_list})
+
+        else:
+            message = "stock might not exist"
+            return render(request, 'result.html', {'message': message})
+
     except Exception as e:
-        render(request, 'sim_trade/stock.html')
+        return render(request, 'error.html', {'message': e.args[0]})
 
-    render(request, 'sim_trade/stock.html')
+def post_follow(request, sym):
+    # 通过stock.html里的“Follow”按钮拿到了company_info.ticker, 通过url传递过来
+    try:
+        user_id = request.session.get('user_id', '')
+        if WatchList.objects.filter(symbol=sym, user=user_id):
+            # 该symbol已经被此用户follow，执行“提示”
+            message = "The stock is already in your list."
+            # return render(request, '/search/%s/' % sym, {'message': message})
+            return HttpResponse(json.dumps({'type': 'error', 'message': message}), content_type="application/json")
+        else:
+            # 该symbol未被此用户follow，执行“添加”
+            item_id = User.objects.get(id=user_id)  # WatchList.user是来自User.id的外键，要先实例化外键database
+            WatchList(symbol=sym, user=item_id).save()  # 再把外键作为WatchList的键，进行添加save
+            return HttpResponse(json.dumps({'type': 'success'}), content_type="application/json")
+    except Exception as e:
+        return HttpResponse(json.dumps({'type': 'error', 'message': e.args[0]}), content_type="application/json")
+

@@ -50,13 +50,6 @@
             font-size: 20px;
             line-height: 26px;
         }
-
-        .wl_time {
-            font-size: 10px;
-            color: #7c7c7c;
-            line-height: 20px;
-            text-align: right;
-        }
     </style>
     <div data-overlay class="bg-primary-2 text-white o-hidden">
         <section>
@@ -101,14 +94,14 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-cente">
                                     <strong class="d-inline-block mb-2 text-dark">{{ stock.symbol }}</strong>
-                                    <span class="wl_time">{{ stock.upd|date:"M d H:i e" }}</span>
+                                    <small class="text-dark">{{ stock.upd|date:"M d H:i e" }}</small>
                                 </div>
                                 {% if stock.c > stock.pc %}
                                     <div class="row mb-2" style="color: #009b72;">
                                         <div class="wl_now col-md-12">{{ stock.c }}<img
                                                 src="{% static 'img\icons\interface\icon-arrow-up.svg' %}"
                                                 class="icon bg-success pb-1" data-inject-svg></div>
-                                        <div class="wl_change col-md-12 ">+{{ stock.res }}%(+{{ stock.chg }})
+                                        <div class="wl_change col-md-12 ">+{{ stock.chg }}(+{{ stock.res }}%)
                                         </div>
                                     </div>
                                 {% else %}
@@ -116,7 +109,7 @@
                                         <div class="wl_now col-md-12">{{ stock.c }}<img
                                                 src="{% static 'img\icons\interface\icon-arrow-down.svg' %}"
                                                 class="icon bg-danger pb-1" data-inject-svg></div>
-                                        <div class="wl_change col-md-12 ">{{ stock.res }}%({{ stock.chg }})
+                                        <div class="wl_change col-md-12 ">{{ stock.chg }}({{ stock.res }}%)
                                         </div>
                                     </div>
                                 {% endif %}

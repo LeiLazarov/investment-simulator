@@ -21,7 +21,7 @@ def login(request):
                 message = 'username does not exist!'
                 return render(request, 'login/login.html', {'message': message})
             if user.password == password:
-                response = redirect('/table/')
+                response = redirect('/')
                 request.session['user_id'] = user.id
                 if remember == "on":
                     response.set_cookie('username', user.username, max_age=7 * 24 * 3600)

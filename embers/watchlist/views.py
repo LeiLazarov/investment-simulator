@@ -24,7 +24,7 @@ def watchlist(request):
         WL['c'] = Stock.objects.get(symbol=e['symbol']).price
         WL['pc'] = Stock.objects.get(symbol=e['symbol']).close
         WL['chg'] = WL['c'] - WL['pc']
-        WL['res'] = "{:.3f}".format((WL['c'] - WL['pc']) * 100 / WL['pc'])
+        WL['res'] = "{:.3f}".format( WL['chg'] * 100 / WL['pc'])
         WL['upd'] = Stock.objects.get(symbol=e['symbol']).updateAt
         WL['createdAt'] = e['createdAt']
         watchlist_list.append(WL)
