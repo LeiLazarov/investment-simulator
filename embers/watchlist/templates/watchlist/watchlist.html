@@ -52,7 +52,7 @@
         }
     </style>
     <div data-overlay class="bg-primary-2 text-white o-hidden">
-        <section>
+        <section class="pb-0">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-xl-8 col-lg-9 text-center">
@@ -71,7 +71,7 @@
         <div class="divider divider-bottom bg-light"></div>
     </div>
 
-    <section class="bg-light">
+    <section class="bg-light pt-1">
         <div class="container">
             <div class="ui-group" data-intro='You can use these buttons to sort your watchlist.' data-step='2'>
                 <h3 class="ui-group__title">Sort</h3>
@@ -119,7 +119,7 @@
                                            href='/stock/{{ stock.symbol }}'>Detail
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                                data-target="#myModal"
+                                                data-target="#myModal" data-toggle="modal"
                                                 onclick="deleteurl('/delete/?delete_id={{ stock.symbol }}')">
                                             Remove
                                         </button>

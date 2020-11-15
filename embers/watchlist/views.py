@@ -32,7 +32,6 @@ def watchlist(request):
     return render(request, 'watchlist/watchlist.html', {'my_watchlist': watchlist_list})
 
 
-
 def delete(request):
     uid = request.session.get('user_id', '')
     delete_id = request.GET.get('delete_id')
