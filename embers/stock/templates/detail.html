@@ -130,8 +130,8 @@
             }
             return result;
         }
-
-        $.get('{{MEDIA_URL}}candles/{{ stock.symbol }}.json', function (data) {
+        var url = '{{MEDIA_URL}}candles/{{ stock.symbol }}.json?t=' +  new Date().valueOf();
+        $.get(url, function (data) {
             myChart.setOption(option = {
                 backgroundColor: '#fff',
                 animation: false,

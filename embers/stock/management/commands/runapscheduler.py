@@ -13,6 +13,8 @@ import json
 import requests
 from datetime import datetime
 from django.utils.timezone import utc
+from stock.views import getCandle
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -46,42 +48,48 @@ def update_detail():
     for detailItem in detail_list:
         # get data
         file_path = settings.MEDIA_ROOT + '\candles\\' + detailItem.symbol + '.json'
-        token = 'buch32v48v6t51vholng'
-        # get the candle json file
-        nowTime = int(time.time())
-        lastTime = nowTime - 2592000  # to last month
-        candle = requests.get(
-            'https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(detailItem.symbol,
-                                                                                                              lastTime,
-                                                                                                              nowTime,
-                                                                                                              token))
-        if candle.status_code != 200:
-            raise Exception('No company info found!')
-        # convert candle from json to dict
-        candle = json.loads(candle.text)
-        # convert candle structure to chart form
-        result = {'categoryData': [], 'values': [], 'volumes': []}
-        for i in range(len(candle['t'])):
-            date = datetime.utcfromtimestamp(candle['t'][i]).strftime("%Y/%m/%d")
-            values = []
-            values.append(round(candle['o'][i], 2))
-            values.append(round(candle['c'][i], 2))
-            values.append(round(candle['l'][i], 2))
-            values.append(round(candle['h'][i], 2))
-            values.append(candle['v'][i])
-            result['categoryData'].append(date)
-            result['values'].append(values)
-            volumes = []
-            volumes.append(i)
-            volumes.append(candle['v'][i])
-            if candle['o'][i] > candle['c'][i]:
-                volumes.append(1)
-            else:
-                volumes.append(-1)
-            result['volumes'].append(volumes)
+        if not os.path.exists(file_path):
+            getCandle(detailItem.symbol)  # no local data, get the last 30 days data
+        else:
+            token = 'buch32v48v6t51vholng'
+            # get the candle json file
+            # python manage.py runapscheduler
+            nowTime = int(time.time())
+            lastTime = nowTime - 3600 * 24 # to last day
+            candle = requests.get(
+                'https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(
+                    detailItem.symbol,
+                    lastTime,
+                    nowTime,
+                    token))
+            if candle.status_code != 200:
+                raise Exception('No company info found!')
+            # convert candle from json to dict
+            candle = json.loads(candle.text)
+            if candle['s'] == 'ok':
+                # append new data to old candle
+                with open(file_path, 'r+') as f:
+                    old_data = json.load(f)
+                    f.seek(0, 0)
+                    old_data['categoryData'].append(datetime.utcfromtimestamp(candle['t'][0]).strftime("%Y/%m/%d"))
 
-        with open(file_path, 'w') as f:
-            json.dump(result, f)
+                    values = []
+                    values.append(round(candle['o'][0], 2))
+                    values.append(round(candle['c'][0], 2))
+                    values.append(round(candle['l'][0], 2))
+                    values.append(round(candle['h'][0], 2))
+                    values.append(candle['v'][0])
+                    old_data['values'].append(values)
+
+                    volumes = []
+                    volumes.append(len(old_data['categoryData']))
+                    volumes.append(candle['v'][0])
+                    if candle['o'][0] > candle['c'][0]:
+                        volumes.append(1)
+                    else:
+                        volumes.append(-1)
+                    old_data['volumes'].append(volumes)
+                    json.dump(old_data, f)
         time.sleep(1)
 
 
@@ -99,7 +107,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             update_quote,
-            trigger=CronTrigger(minute="*/10",day_of_week="0-4",hour="14-21"),  # Every 10 minutes
+            trigger=CronTrigger(minute="*/10"),  # Every 10 minutes
             id="update_quote",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,

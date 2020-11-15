@@ -22,4 +22,5 @@ app_name = 'stock'
 urlpatterns = [
     re_path(r'^stock/(.+)/$', views.stock, name='stock'),
     re_path(r'^search/(.+)/$', views.search, name='search'),
+    re_path(r'^post_follow/(.+)/$', views.post_follow, name='post_follow'),
 ]
