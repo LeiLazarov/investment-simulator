@@ -15,65 +15,54 @@ def table(request):
 
 
 def account_record(request):
-    #check the user_id
     uid = request.session.get('user_id', '')
     if not uid:
         return redirect("/login/")
-    
-    #get the record according to uid
+    #uid = 1
     record_account = sim_models.Record.objects.filter(user_id=uid).values()
     record_list = []
     
-    #change the record data to fit the table 
-    for i in range(len(record_account)):
+    for e in record_account:
         record = {}
-        record['id'] = i + 1
-        record['stockname'] = stock_models.Stock.objects.get(id= record_account[i]['stock_id']).symbol
-        record['quantity'] = record_account[i]['quantity']
-        record['price'] = record_account[i]['price']
-        record['type'] = 'sell' if record_account[i]['type'] == True else 'buy'
-        record['createdAt'] = record_account[i]['createdAt']
-        record['stock_value'] = -record_account[i]['price'] * record_account[i]['quantity'] if record_account[i]['type'] == True else record_account[i]['price'] * record_account[i]['quantity']
+        record['id'] = e['id']
+        record['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
+        record['quantity'] = e['quantity']
+        record['price'] = e['price']
+        record['type'] = 'sell' if e['type'] == True else 'buy'
+        record['createdAt'] = e['createdAt']
+        record['stock_value'] = -e['price'] * e['quantity'] if e['type'] == True else e['price'] * e['quantity']
         record_list.append(record)
     
     return render(request, 'record/record.html',{'record': record_list})
 
 def analysis(request):
-    #check uid
     uid = request.session.get('user_id', '')
     if not uid:
         return redirect("/login/")
-    
-    #get the owned data 
     record_account = sim_models.Owned.objects.filter(user_id=uid).values()
-
-    #mark the total paid value 
     total_value = 0
     record_value = []
-
-    #change the data to json form
-    for e in record_account:     
-        value = {}
-        value['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol      
-        value['unit'] = e['quantity']
-        value['owned_value'] = e['avg_price'] * e['quantity'] # total paid value
-        value['current_value'] = stock_models.Stock.objects.get(id= e['stock_id']).price * e['quantity'] #current value
+    for e in record_account:
        
-        value['owned_value'] = float(value['owned_value'])
-        value['current_value'] = float(value['current_value'])
+        value = {}
 
+        value['stockname'] = stock_models.Stock.objects.get(id= e['stock_id']).symbol
+        
+        value['unit'] = e['quantity']
+        value['owned_value'] = e['avg_price'] * e['quantity']
+        value['current_value'] = stock_models.Stock.objects.get(id= e['stock_id']).price * e['quantity']
         e = value['current_value'] - value['owned_value']
         if e > 0:
-            value['profit'] = e
+            value['profit'] = float(e)
+            value['loss'] = 0
         else:
-            value['loss'] = e
+            value['profit'] = 0
+            value['loss'] = float(e)
 
-        
-        #calculate the total paid value
+        value['owned_value'] = float(value['owned_value'])
+        value['current_value'] = float(value['current_value'])
         total_value +=  value['owned_value']
         record_value.append(value)
-
-    #set the threshold of data
     value_thr = total_value * 0.01
 
     return render(request, 'record/analysis.html', {'account': record_value, 'value_thr': value_thr})
