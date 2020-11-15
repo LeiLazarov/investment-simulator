@@ -11,44 +11,8 @@ from stock.views import getStockQuote
 import datetime
 from sim_trade.models import Owned, Record
 
-# Create your views here.
 
-def sim_trade(request):
-    if request.method == 'GET':
-        not_found_msg = None
-    return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
-
-
-def sim_trade_stock(request):
-    if request.method == 'POST':
-        stock_code = request.POST.get('stock_code').upper()
-        stock_quote = requests.get(
-            'https://finnhub.io/api/v1/quote?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug')
-        company_info = requests.get(
-            'https://finnhub.io/api/v1/stock/profile2?symbol=' + stock_code + '&token=buajtbf48v6ocn3pc8ug'
-        )
-
-        if len(company_info.json()) == 0:
-            not_found_msg = "The stock might not exist!"
-            return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
-
-        return render(request, 'sim_trade/result.html',
-                      {'stock': stock_quote.json(), 'company_info': company_info.json()})
-
-
-def checkStock(request, offset):
-    try:
-        stockItem = getStockQuote(offset.upper())
-        if stockItem:
-            res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
-            res['name']=Symbol.objects.get(symbol=stockItem.symbol).cmpname
-            res['type']='success'
-            return HttpResponse(json.dumps(res), content_type="application/json")
-    except Exception as e:
-        return HttpResponse(json.dumps({'type':'error', 'message': e.args[0]}), content_type="application/json")
-    return HttpResponse(json.dumps({'type':'error'}), content_type="application/json")
-
-
+# this function return the page of simtrade
 def table(request):
     uid = request.session.get('user_id', '')
     if not uid:
@@ -65,8 +29,10 @@ def table(request):
     return render(request, 'sim_trade/table.html', {'acc': acc, 'owned_list':owned_list})
 
 
+# this function for check input stock code is valid
 def checkStock(request, offset):
     try:
+        # find stock quote from API and local database
         stockItem = getStockQuote(offset.upper())
         if stockItem:
             res = json.loads(serialize('json', [stockItem])[1:-1])['fields']
@@ -78,6 +44,7 @@ def checkStock(request, offset):
     return HttpResponse(json.dumps({'type':'error'}), content_type="application/json")
 
 
+# similar to checkStock() but it for sell process
 def sellCheckStock(request, offset):
     uid = request.session.get('user_id', '')
     try:
@@ -95,6 +62,7 @@ def sellCheckStock(request, offset):
     return HttpResponse(json.dumps({'type':'error'}), content_type="application/json")
 
 
+# get the list of owned stocks
 def getOwned(request):
     try:
         uid = request.session.get('user_id', '')
@@ -111,6 +79,7 @@ def getOwned(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+# process the submitted but order
 def buy_stock(request):
     ret = {'type': 'error', 'message': ''}
     data = json.loads(request.body)
@@ -165,6 +134,7 @@ def buy_stock(request):
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
 
+# process the submitted sell order
 def sell_stock(request):
     ret = {'type': 'error', 'message': ''}
     data = json.loads(request.body)
@@ -206,6 +176,7 @@ def sell_stock(request):
     return HttpResponse(json.dumps(ret), content_type="application/json")
 
 
+# tool function for calculating statistic
 def refreshStat(uid):
     user = User.objects.get(pk=uid)
     # modify the statistics
@@ -214,7 +185,7 @@ def refreshStat(uid):
     for ss in ownStocks:
         stockValue+= ss.quantity * ss.stock.price
 
-    # account value, cash, stock value, earning
+    # [account value, cash, stock value, earning]
     return [stockValue+user.cash, user.cash, stockValue, stockValue+user.cash-user.init]
 
 
