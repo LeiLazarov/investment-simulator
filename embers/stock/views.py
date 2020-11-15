@@ -5,11 +5,10 @@ from datetime import datetime, timedelta
 from django.utils.timezone import utc
 import json
 import time
+import os
 
 from embers import settings
 from stock.models import Stock, Detail, Symbol
-from watchlist.models import WatchList, User
-from django.db.models import Q
 
 
 def stock(request, offset):
@@ -17,8 +16,9 @@ def stock(request, offset):
         offset = offset.upper() # convert to upper char
         stockItem = getStockQuote(offset)
         detailItem = getStockDetail(offset)
+        getCandle(offset)
     except Exception as e:
-        return render(request, 'error.html', {'message': e.args[0]})
+        return render(request, 'error.html', {'message':e.args[0]})
 
     return render(request, 'detail.html', {"stock": detailItem, 'price': stockItem})
 
@@ -26,37 +26,11 @@ def stock(request, offset):
 # get the stock quote from its symbol
 def getStockQuote(symbol):
     token = 'buch32v48v6t51vholng'
-    # sss the local database
+    # search the local database
     stockFilter = Stock.objects.filter(symbol=symbol)
 
     if stockFilter.exists(): # local contains
         stockItem = stockFilter.first()
-        # if the update time > 10 min, update it from API
-        now = datetime.utcnow().replace(tzinfo=utc)
-        u_time = stockItem.updateAt
-        if u_time + timedelta(minutes=10) < now:
-            # get data
-            quote = requests.get('https://finnhub.io/api/v1/quote?symbol=' + symbol + '&token=' + token)
-
-            if quote.status_code != 200:  # fail to get data
-                return stockItem
-
-            quote = json.loads(quote.text)  # convert data from json to dict
-
-            if quote['t'] == 0:  # the api return a null dict
-                return stockItem
-
-            if quote['t'] == int(time.mktime(stockItem.updateAt.timetuple())): # no need to update
-                return stockItem
-
-            stockItem.price=quote['c']
-            stockItem.open=quote['o']
-            stockItem.close=quote['pc']
-            stockItem.high=quote['h']
-            stockItem.low=quote['l']
-            stockItem.updateAt = datetime.fromtimestamp(int(quote['t'])).astimezone(utc)
-            stockItem.save()
-
         return stockItem
     else:  # get it from API and store in the local
         # get data
@@ -97,10 +71,45 @@ def getStockDetail(symbol):
             raise Exception('Connect time out!')
         # convert company info from json to dict
         info = json.loads(info.text)
+
+        # store company info to local
+        stock = models.Stock.objects.get(symbol=symbol)
+        if info == {}:
+            detailItem = Detail.objects.create(
+                stock=stock,
+                symbol=symbol
+            )
+        else:
+            detailItem = Detail.objects.create(
+                stock=stock,
+                symbol=symbol,
+                country=info['country'],
+                currency=info['currency'],
+                exchange=info['exchange'],
+                phone=info['phone'],
+                ipo=info['ipo'],
+                marketCapitalization=info['marketCapitalization'],
+                shareOutstanding=info['shareOutstanding'],
+                cmpname=info['name'],
+                weburl=info['weburl'],
+                logo=info['logo'],
+                industry=info['finnhubIndustry'],
+            )
+        return detailItem
+
+def getCandle(symbol):
+    # store canverted json file
+    file_path = settings.MEDIA_ROOT + '\candles\\' + symbol + '.json'
+    if not os.path.exists(file_path):
+        token = 'buch32v48v6t51vholng'
         # get the candle json file
         nowTime = int(time.time())
-        lastTime = nowTime - 31622400
-        candle = requests.get('https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,lastTime,nowTime,token))
+        lastTime = nowTime - 2592000  # to last month
+        candle = requests.get(
+            'https://finnhub.io/api/v1/stock/candle?symbol={0}&resolution=D&from={1}&to={2}&token={3}'.format(symbol,
+                                                                                                              lastTime,
+                                                                                                              nowTime,
+                                                                                                              token))
         if candle.status_code != 200:
             raise Exception('No company info found!')
         # convert candle from json to dict
@@ -125,32 +134,10 @@ def getStockDetail(symbol):
             else:
                 volumes.append(-1)
             result['volumes'].append(volumes)
-        # store canverted json file
-        url = '\candles\\' + symbol + '.json'
-        path = settings.MEDIA_ROOT + url
-        with open(path, 'w') as f:
+
+        with open(file_path, 'w') as f:
             json.dump(result, f)
-        # store company info to local
-        stock = models.Stock.objects.get(symbol=symbol)
-        detailItem = Detail.objects.create(
-            stock=stock,
-            symbol=symbol,
-            country=info['country'],
-            currency=info['currency'],
-            exchange=info['exchange'],
-            phone=info['phone'],
-            ipo=info['ipo'],
-            marketCapitalization=info['marketCapitalization'],
-            shareOutstanding=info['shareOutstanding'],
-            cmpname=info['name'],
-            weburl=info['weburl'],
-            logo=info['logo'],
-            industry=info['finnhubIndustry'],
-        )
-        return detailItem
 
-
-'''
 def search(request, offset):
     try:
         offset = offset.upper() # convert to upper char
@@ -164,46 +151,9 @@ def search(request, offset):
             not_found_msg = "The stock might not exist!"
             return render(request, 'sim_trade/sim_trade.html', {'not_found_msg': not_found_msg})
 
-        return render(request, 'sim_trade/result.html',
+        return render(request, 'sim_trade/stock.html',
                       {'stock': stock_quote.json(), 'company_info': company_info.json()})
     except Exception as e:
-        render(request, 'sim_trade/result.html')
+        render(request, 'sim_trade/stock.html')
 
-    return render(request, 'sim_trade/result.html')
-'''
-
-
-def search(request, offset):
-    try:
-        offset = offset.upper() # convert to upper char
-        stocks_list = []  # 存所有查询到的可能的stocks
-        # stock_code = request.POST.get('stock_code').upper()  # 这里的stock_code可能是code也可能是公司名称之类,模糊查
-        stock_code = offset
-        # 如果这里写symbol=code，不模糊查询的话，只要触发就返回结果了；换句话说，只能拿到一个stock
-        stocks = models.Symbol.objects.filter(Q(symbol__contains=stock_code) | Q(cmpname__contains=stock_code))[:10]
-        # 已经在数据库里查到stock, 去拿symbol和company_name
-        if stocks.exists():
-            for one_stock in stocks:
-                # 数据库里record拿出来的形式，是model
-                stockItem = {}
-                quote_res = getStockQuote(one_stock.symbol)
-
-                stockItem['symbol'] = one_stock.symbol
-                stockItem['cmpname'] = one_stock.cmpname
-                stockItem['price'] = quote_res.price
-                stockItem['open'] = quote_res.open
-                stockItem['close'] = quote_res.close
-                stockItem['high'] = quote_res.high
-                stockItem['low'] = quote_res.low
-
-                stocks_list.append(stockItem)
-
-            return render(request, 'result.html', {'stocks_list': stocks_list})
-
-        else:
-            message = "stock might not exist"
-            return render(request, 'result.html', {'message': message})
-
-    except Exception as e:
-        return render(request, 'error.html', {'message': e.args[0]})
-
+    render(request, 'sim_trade/stock.html')

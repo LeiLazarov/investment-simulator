@@ -6,12 +6,71 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+        .order-icon-up span {
+            background: url({% static 'img\icons\interface\icon-arrow-up.svg' %}) no-repeat;
+            background-size: 18px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .order-icon-down span {
+            background: url({% static 'img\icons\interface\icon-arrow-down.svg' %}) no-repeat;
+            background-size: 18px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .ui-group {
+            display: inline-block;
+        }
+
+        .ui-group__title {
+            display: inline-block;
+            vertical-align: top;
+            font-size: 1.2rem;
+            line-height: 40px;
+            margin: 0 10px 0 0;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .wl_now {
+            white-space: nowrap;
+            text-align: center;
+            font-size: 3rem;
+        }
+
+        .wl_change {
+            text-align: right;
+            font-size: 20px;
+            line-height: 26px;
+        }
+
+        .wl_time {
+            font-size: 10px;
+            color: #7c7c7c;
+            line-height: 20px;
+            text-align: right;
+        }
+    </style>
     <div data-overlay class="bg-primary-2 text-white o-hidden">
         <section>
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-xl-8 col-lg-9 text-center">
                         <h1 class="display-3">My Watchlist</h1>
+                        <div class="btn-toolbar">
+                            <button href="javascript:void(0);"
+                                    onclick="javascript:introJs().setOption('showProgress', true).start();"
+                                    class=" m-auto btn btn-primary btn-sm">
+                                Introduction
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -21,103 +80,221 @@
 
     <section class="bg-light">
         <div class="container">
-            <div class="row justify-content-between align-items-start">
-                <div class="col-lg-8">
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <p><a href="javascript:void(0);" onclick="javascript:introJs().setOption('showProgress', true).start();" class="mr-2 btn btn-primary btn-sm">
-                            Intro
-                        </a></p>
-                    </div>
-                    {% for stock in my_watchlist %}
-                        <div class="mb-3 mb-sm-4">
-                            <div class="card flex-md-row align-items-start align-items-md-center hover-box-shadow" data-intro='Each card shows the latest information of the stock you interested in.' data-step='1'>
-                                <div style="width: 100%;">
-                                    <div class="card-header bg-primary-3">
-                                        <a href='/stock/{{stock.symbol}}' title='View detail' target='_blank' data-intro='Click stock code to view more details(a graph showing the historical daily closing unit price for the stock).' data-step='2'>Stock Code: {{stock.symbol}}</a>
+            <div class="ui-group" data-intro='You can use these buttons to sort your watchlist.' data-step='2'>
+                <h3 class="ui-group__title">Sort</h3>
+                <div id="sort-buttons" class="sort-by button-group js-radio-button-group">
+                    <button id='sort-date' class="btn btn-sm btn-outline btn-secondary order-icon-down"
+                            onclick="sortData('date')">Add date<span></span></button>
+                    <button id='sort-price' class="btn btn-sm btn-outline" onclick="sortData('price')">Current
+                        Price<span></span></button>
+                    <button id='sort-symbol' class="btn btn-sm btn-outline" onclick="sortData('symbol')">
+                        Symbol<span></span></button>
+                    <button id='sort-rate' class="btn btn-sm btn-outline" onclick="sortData('rate')">Rate<span></span>
+                    </button>
+                </div>
+            </div>
+            <div id="watch-list" data-intro='Here are your stocks.' data-step='1' class="row align-items-start">
+                {% for stock in my_watchlist %}
+                    <div class="col-lg-4 mb-2 mt-2" data-symbol="{{ stock.symbol }}" data-price="{{ stock.c }}"
+                         data-date="{{ stock.createdAt|date:"U" }}" data-rate="{{ stock.res }}">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-cente">
+                                    <strong class="d-inline-block mb-2 text-dark">{{ stock.symbol }}</strong>
+                                    <span class="wl_time">{{ stock.upd|date:"M d H:i e" }}</span>
+                                </div>
+                                {% if stock.c > stock.pc %}
+                                    <div class="row mb-2" style="color: #009b72;">
+                                        <div class="wl_now col-md-12">{{ stock.c }}<img
+                                                src="{% static 'img\icons\interface\icon-arrow-up.svg' %}"
+                                                class="icon bg-success pb-1" data-inject-svg></div>
+                                        <div class="wl_change col-md-12 ">+{{ stock.res }}%(+{{ stock.chg }})
+                                        </div>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="card-text" style=" margin-top: 1%; margin-bottom: 1%">Current Price: ${{ stock.c }} per unit</div>
-                                        <p class="card-text" data-intro='This percentage change compares the latest stock unit price to the stock unit price yesterday.' data-step='3'>Percentage Change: {{ stock.res }}%</p>
-                                        <div class="card-text" style="float: left" data-intro='This is the date the stock was added to the watchlist.' data-step='4'>{{ stock.createdAt }}</div>
-                                        <button class="btn btn-danger btn-sm" style="float: right" data-toggle="modal" data-target="#myModal" onClick="deleteurl('/delete/?delete_id={{stock.symbol}}')">Remove</button>
-                                    </div>                                            
+                                {% else %}
+                                    <div class="row mb-2" style="color: #dc3545;">
+                                        <div class="wl_now col-md-12">{{ stock.c }}<img
+                                                src="{% static 'img\icons\interface\icon-arrow-down.svg' %}"
+                                                class="icon bg-danger pb-1" data-inject-svg></div>
+                                        <div class="wl_change col-md-12 ">{{ stock.res }}%({{ stock.chg }})
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <a type="button" class="btn btn-sm btn-outline-info" target='_blank'
+                                           href='/stock/{{ stock.symbol }}'>Detail
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-target="#myModal"
+                                                onclick="deleteurl('/delete/?delete_id={{ stock.symbol }}')">
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">{{ stock.createdAt |date:"d-M-Y" }}</small>
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-
-                    <div class="row justify-content-center mt-4" >
-                        <div class="col-auto">
-                            <nav>
-                                {% if my_watchlist.has_other_pages %}
-                                <ul class="pagination">
-                                    {% if my_watchlist.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link rounded" href="?page={{ my_watchlist.previous_page_number }}" aria-label="Previous">
-                                            <img src="{% static 'img/icons/interface/icon-arrow-left.svg' %}" alt="Arrow Left" class="icon icon-xs bg-primary" data-inject-svg>
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                    {% for i in my_watchlist.paginator.page_range %}
-                                        {% if my_watchlist.number == i %}
-                                            <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
-                                        {% else %}
-                                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if my_watchlist.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link rounded" href="?page={{ my_watchlist.next_page_number }}" aria-label="Next">
-                                            <img src="{% static 'img/icons/interface/icon-arrow-right.svg' %}" alt="Arrow Right" class="icon icon-xs bg-primary" data-inject-svg>
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                </ul>
-                                {% endif %}
-                            </nav>
-                        </div>
                     </div>
+                {% endfor %}
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <nav>
+                        {% if my_watchlist.has_other_pages %}
+                            <ul class="pagination">
+                                {% if my_watchlist.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link rounded"
+                                           href="?page={{ my_watchlist.previous_page_number }}"
+                                           aria-label="Previous">
+                                            <img src="{% static 'img/icons/interface/icon-arrow-left.svg' %}"
+                                                 alt="Arrow Left" class="icon icon-xs bg-primary"
+                                                 data-inject-svg>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% for i in my_watchlist.paginator.page_range %}
+                                    {% if my_watchlist.number == i %}
+                                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if my_watchlist.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link rounded"
+                                           href="?page={{ my_watchlist.next_page_number }}" aria-label="Next">
+                                            <img src="{% static 'img/icons/interface/icon-arrow-right.svg' %}"
+                                                 alt="Arrow Right" class="icon icon-xs bg-primary"
+                                                 data-inject-svg>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        {% endif %}
+                    </nav>
                 </div>
             </div>
         </div>
+        </div>
     </section>
-    
-    <div class="modal fade" style="position: fixed;z-index: 999999;max-width: 1000px; left: 270px; top:300px;" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	    <div class="modal-dialog">
-	        <div class="modal-content">
-		        <div class="modal-header">
+
+    <div class="modal fade" style="position: fixed;z-index: 999999;max-width: 1000px; left: 270px; top:300px;"
+         id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-					    x
-	                </button>
-				    <h4 class="modal-title" id="myModalLabel">
-	                    Remove it from your watchlist
-		            </h4>
+                        x
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Remove it from your watchlist
+                    </h4>
                 </div>
-			    <div class="modal-body">
-	                Are you sure you want to remove this stock from your watchlist?
+                <div class="modal-body">
+                    Are you sure you want to remove this stock from your watchlist?
                 </div>
-			    <div class="modal-footer">
+                <div class="modal-footer">
                     <input type="hidden" id="url"/>
                     <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close
-				    </button>
-                    <button type="button" class="btn btn-info btn-sm" onclick="urlSubmit()">
-		                Confirm
                     </button>
-			    </div>
-		    </div>
-	    </div>
+                    <button type="button" class="btn btn-info btn-sm" onclick="urlSubmit()">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block script_content %}
     <script>
-        function deleteurl(url){
-             $('#url').val(url);
+        function deleteurl(url) {
+            $('#url').val(url);
         }
 
-        function urlSubmit(){ 
-            var url=$.trim($("#url").val());
-            window.location.href=url;   
+        function urlSubmit() {
+            var url = $.trim($("#url").val());
+            window.location.href = url;
+        }
+
+        function sortData(query) {
+            var tar = $('#sort-' + query)
+            var asc = true
+            if (tar.hasClass('btn-secondary')) {
+                if (tar.hasClass('order-icon-up')) {
+                    asc = false
+                    tar.removeClass('order-icon-up')
+                    tar.addClass('order-icon-down');
+                } else {
+                    tar.removeClass('order-icon-down');
+                    tar.addClass('order-icon-up')
+                }
+            } else {
+                $('#sort-buttons').children().removeClass('btn-secondary');
+                $('#sort-buttons').children().removeClass('order-icon-down');
+                $('#sort-buttons').children().removeClass('order-icon-up');
+                tar.addClass('btn-secondary');
+                tar.addClass('order-icon-up');
+            }
+            var list = $("#watch-list");
+            var items = list.children("div");
+            if (asc) {
+                items.detach().sort(function (a, b) {
+                    switch (query) {
+                        case ('date'):
+                            var val1 = parseInt(a.dataset.date)
+                            var val2 = parseInt(b.dataset.date)
+                            return val1 - val2
+                        case ('symbol'):
+                            var val1 = a.dataset.symbol
+                            var val2 = b.dataset.symbol
+                            if (val1 > val2) {
+                                return 1
+                            } else {
+                                return -1
+                            }
+                        case ('price'):
+                            var val1 = parseFloat(a.dataset.price)
+                            var val2 = parseFloat(b.dataset.price)
+                            return val1 - val2
+                        case ('rate'):
+                            var val1 = parseFloat(a.dataset.rate)
+                            var val2 = parseFloat(b.dataset.rate)
+                            return val1 - val2
+                    }
+                });
+            } else {
+                items.detach().sort(function (a, b) {
+                    switch (query) {
+                        case ('date'):
+                            var val1 = parseInt(a.dataset.date)
+                            var val2 = parseInt(b.dataset.date)
+                            return val2 - val1
+                        case ('symbol'):
+                            var val1 = a.dataset.symbol
+                            var val2 = b.dataset.symbol
+                            if (val1 > val2) {
+                                return -1
+                            } else {
+                                return 1
+                            }
+                        case ('price'):
+                            var val1 = parseFloat(a.dataset.price)
+                            var val2 = parseFloat(b.dataset.price)
+                            return val2 - val1
+                        case ('rate'):
+                            var val1 = parseFloat(a.dataset.rate)
+                            var val2 = parseFloat(b.dataset.rate)
+                            return val2 - val1
+                    }
+                });
+            }
+
+            list.append(items);
         }
     </script>
 
