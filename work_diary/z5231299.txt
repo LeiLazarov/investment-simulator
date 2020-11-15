@@ -1,28 +1,8 @@
-week01
+week 1
 group meeting and choose scrum master. 
 
-week02
+week 2
 Complete the summary of user stories.
 
-week03
+week 3
 Complete the part of user stories in the proposal and  edit the whole proposal.
-
-week04
-I studied the frame of Django and the knowlege about html.
-
-week05
-We hold the retrospective meeting and discussed the next development plan. 
-
-week06
-I started to build the webpage of 'my watchlist.
-
-week07
-Continue with the page layout and function implementation of 'my watchlist'
-
-week08
-Basically realized the required function.
-
-week09
-Add the function of modal on remove button.
-Write the report of watchlist part and three-party functionalities.
-Edit our report.
