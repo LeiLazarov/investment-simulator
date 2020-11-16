@@ -35,3 +35,14 @@ to develop further.
 <week 7>
 I have built a initial 'my watchlist' app including presenting stock list with paginator, and view a graph of single stock
 for my teammate Di Wu to develop further.
+
+<week 8>
+I fixed bugs like the exception of detail display, and combined all module my teammates developed for demo B, and
+we got a full mark for it.
+Also I organized the meeting for retrospective B to finish the report of it, and draft a version of it.
+
+<week 9>
+I finished the final edition of the Retrospective B, and submit it as required.
+I organized team meeting to discuss what we need to on tasks of report and code quality, I assigned reasonable to-do tasks
+to my teammates, and took charge in Overview and user document, also was responsible for the report review and system
+test on CSE VLAB.
