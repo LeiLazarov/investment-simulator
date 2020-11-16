@@ -118,7 +118,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body row">
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <form>
                             {% csrf_token %}
                             <div class="form-group row">
@@ -128,7 +128,7 @@
                                            aria-label="Stock symbol" aria-describedby="button-addon1"
                                            onchange="chgSym()">
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-primary" onclick="checkStock()" type="button"
+                                        <button class="btn btn-outline-primary" onclick="checkStock()" type="button" style="max-height: 48px;"
                                                 id="button-addon1">
                                             Check
                                         </button>
@@ -181,8 +181,8 @@
                                 <input type="number" class="form-control col-sm-4" id="quantity" disabled
                                        name="qua" oninput="inputQ()" onchange="changeQ()">
                             </div>
-                            <div class="form-group text-right row">
-                                <div class="col-sm-8">
+                            <div class="form-group text-center row">
+                                <div class="col-sm-12">
                                     <button id="submit" disabled type="button" onclick="orderSubmit()"
                                             class="btn btn-primary">
                                         Submit
@@ -192,7 +192,7 @@
                         </form>
                         <p>{{ buy_res }}</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <table class="w-100">
                             <tr>
                                 <td>Account Value</td>
@@ -221,7 +221,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body row">
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <form>
                             {% csrf_token %}
                             <div class="form-group row">
@@ -233,7 +233,7 @@
                                     </select>
                                     <div class="input-group-append">
                                         <button id="button-addon2" class="btn btn-outline-primary"
-                                                onclick="sellCheckStock()" type="button">Check
+                                                onclick="sellCheckStock()" type="button" style="max-height: 48px;">Check
                                         </button>
                                     </div>
                                 </div>
@@ -296,8 +296,8 @@
                                 <input type="number" class="form-control col-sm-4" id="sell_quantity" disabled
                                        name="qua" oninput="sellInputQ()" onchange="sellChangeQ()">
                             </div>
-                            <div class="form-group text-right row">
-                                <div class="col-sm-8">
+                            <div class="form-group text-center row">
+                                <div class="col-sm-12">
                                     <button id="sell_submit" disabled type="button" onclick="sellSubmit()"
                                             class="btn btn-primary">
                                         Submit
@@ -307,7 +307,7 @@
                         </form>
                         <p>{{ buy_res }}</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <table class="w-100">
                             <tr>
                                 <td>Account Value</td>

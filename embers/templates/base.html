@@ -62,12 +62,12 @@
                                href="{% url 'tutorial:intro' %}" role="button">Tutorial</a>
                         </li>
                     </ul>
-                    <div class="input-group w-25">
+                    <div class="input-group col-lg-4">
                         <input type="text" class="form-control" placeholder="stock name"
                                aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="button-search"
-                                    onclick="searchSym()" style="background-color: lightgray"><img
+                                    onclick="searchSym()" style="background-color: lightgray;height:48px;"><img
                                     class="icon icon-sm" data-inject-svg
                                     src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
                         </div>
@@ -105,12 +105,12 @@
                                href="{% url 'contact_us' %}" role="button">Contact us</a>
                         </li>
                     </ul>
-                    <div class="input-group w-25">
-                        <input type="text" class="form-control" placeholder="Stock symbol"
+                    <div class="input-group col-lg-4">
+                        <input type="text" class="form-control" placeholder="stock name"
                                aria-label="Search stock symbol" id="symText" aria-describedby="button-search">
                         <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="button-search"
-                                    onclick="searchSym()" style="background-color: lightgray"><img
+                                    onclick="searchSym()" style="background-color: lightgray;height:48px;"><img
                                     class="icon icon-sm" data-inject-svg
                                     src="{% static 'img/icons/interface/icon-search.svg' %}"></button>
                         </div>
