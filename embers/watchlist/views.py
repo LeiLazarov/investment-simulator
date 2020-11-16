@@ -18,12 +18,13 @@ def watchlist(request):
     watchlist_list = []
 # Retrieve stock information from "stock.model"
     for e in watchlist_account:
+        stockItem = Stock.objects.get(symbol=e['symbol'])
         WL = {}
         WL['id'] = e['id']
         WL['symbol'] = e['symbol']
-        WL['c'] = Stock.objects.get(symbol=e['symbol']).price
-        WL['pc'] = Stock.objects.get(symbol=e['symbol']).close
-        WL['chg'] = WL['c'] - WL['pc']
+        WL['c'] = stockItem.price
+        WL['pc'] = stockItem.close
+        WL['chg'] = stockItem.price - stockItem.close
 # Percentage Change = (current unit price- previous day's unit price) / previous day's unit price
         WL['res'] = "{:.3f}".format( WL['chg'] * 100 / WL['pc'])
         WL['upd'] = Stock.objects.get(symbol=e['symbol']).updateAt

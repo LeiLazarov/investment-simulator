@@ -12,6 +12,7 @@ from embers import settings
 from stock.models import Stock, Detail, Symbol
 from watchlist.models import WatchList, User
 from django.db.models import Q
+from decimal import *
 
 def stock(request, offset):
     try:
@@ -143,26 +144,49 @@ def getCandle(symbol):
 
 
 def search(request, offset):
-    try:
         offset = offset.upper() # convert to upper char
         stocks_list = []  # save query results
         stock_code = offset
         # fuzzy query, symbol or company name
-        stocks = models.Symbol.objects.filter(Q(symbol__contains=stock_code) | Q(cmpname__contains=stock_code))[:9]
+        rightStock = models.Symbol.objects.filter(symbol=stock_code)
+        if rightStock.exists():
+            right = rightStock.first()
+            stockItem = {}  # define the format to transfer
+            try:
+                quote_res = getStockQuote(right.symbol)
+                # include info
+                stockItem['symbol'] = right.symbol
+                stockItem['name'] = right.cmpname
+                stockItem['price'] = quote_res.price
+                stockItem['close'] = quote_res.close
+                stockItem['chg'] = round(quote_res.price - quote_res.close, 2)
+                stockItem['res'] = "{:.3f}".format((stockItem['chg']) * 100 / stockItem['close'])
+                stockItem['date'] = quote_res.updateAt
+                stocks_list.append(stockItem)
+            except Exception as e:
+                pass
+        stocks = models.Symbol.objects.filter(Q(symbol__startswith=stock_code) | Q(cmpname__contains=stock_code))[:6]
         # if already exist in DB
         if stocks.exists():
             for one_stock in stocks:
+                if one_stock.symbol == stock_code:
+                    continue
                 stockItem = {}  # define the format to transfer
-                quote_res = getStockQuote(one_stock.symbol)
+                try:
+                    quote_res = getStockQuote(one_stock.symbol)
+                except Exception as e:
+                    continue
                 # include info
                 stockItem['symbol'] = one_stock.symbol
                 stockItem['name'] = one_stock.cmpname
                 stockItem['price'] = quote_res.price
                 stockItem['close'] = quote_res.close
-                stockItem['chg'] = quote_res.price - quote_res.close
+                stockItem['chg'] = round(quote_res.price - quote_res.close,2)
                 stockItem['res'] = "{:.3f}".format((stockItem['chg']) * 100 / stockItem['close'])
                 stockItem['date'] = quote_res.updateAt
                 stocks_list.append(stockItem)
+                if len(stocks_list)==6:
+                    break
             # transmit stock_list to result.html
             return render(request, 'result.html', {'stocks_list': stocks_list})
 
@@ -170,8 +194,7 @@ def search(request, offset):
             message = "stock might not exist"
             return render(request, 'result.html', {'message': message}) # not found message
 
-    except Exception as e:
-        return render(request, 'error.html', {'message': e.args[0]})
+
 
 
 def post_follow(request, sym):

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # ./manage.py runapscheduler
 
 def update_quote():
-    token = 'buch32v48v6t51vholng'
+    token = 'buolrdf48v6os164hva0'
     stock_list = models.Stock.objects.all()
     for stockItem in stock_list:
         # get data
@@ -51,7 +51,7 @@ def update_detail():
         if not os.path.exists(file_path):
             getCandle(detailItem.symbol)  # no local data, get the last 30 days data
         else:
-            token = 'buch32v48v6t51vholng'
+            token = 'buolrdf48v6os164hva0'
             # get the candle json file
             # python manage.py runapscheduler
             nowTime = int(time.time())
@@ -116,7 +116,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             update_detail,
-            trigger=CronTrigger(minute="00",day_of_week="0-4",hour="22"),  # End of day
+            trigger=CronTrigger(minute="05",day_of_week="0-4",hour="22"),  # End of day
             id="update_detail",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,
