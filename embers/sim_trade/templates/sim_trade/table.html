@@ -434,7 +434,6 @@
                 $("span#chgS").css("color", "green");
                 $("input#quantity").val(parseInt(unit));
                 $('#submit').attr("disabled", false);
-                $()
             } else {
                 $("span#chgC").text('')
                 $("span#chgS").text('')
@@ -477,6 +476,7 @@
     </script>
     <script>
         function sellCheckStock() {
+            $('#sell_submit').attr("disabled", true);
             var sym = $("#stockSelect").val()
             if (sym != "") {
                 var url = 'sim_trade/sellCheckStock/' + sym;
