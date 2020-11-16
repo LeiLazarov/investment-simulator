@@ -119,7 +119,7 @@
                                            href='/stock/{{ stock.symbol }}'>Detail
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                                data-target="#myModal"
+                                                data-target="#myModal" data-toggle="modal"
                                                 onclick="deleteurl('/delete/?delete_id={{ stock.symbol }}')">
                                             Remove
                                         </button>
@@ -215,16 +215,16 @@
         }
 
         function sortData(query) {
-            var tar = $('#sort-' + query)
-            var asc = true
+            var tar = $('#sort-' + query);
+            var asc = true;
             if (tar.hasClass('btn-secondary')) {
                 if (tar.hasClass('order-icon-up')) {
-                    asc = false
-                    tar.removeClass('order-icon-up')
+                    asc = false;
+                    tar.removeClass('order-icon-up');
                     tar.addClass('order-icon-down');
                 } else {
                     tar.removeClass('order-icon-down');
-                    tar.addClass('order-icon-up')
+                    tar.addClass('order-icon-up');
                 }
             } else {
                 $('#sort-buttons').children().removeClass('btn-secondary');
@@ -239,50 +239,50 @@
                 items.detach().sort(function (a, b) {
                     switch (query) {
                         case ('date'):
-                            var val1 = parseInt(a.dataset.date)
-                            var val2 = parseInt(b.dataset.date)
-                            return val1 - val2
+                            var val1 = parseInt(a.dataset.date);
+                            var val2 = parseInt(b.dataset.date);
+                            return val1 - val2;
                         case ('symbol'):
-                            var val1 = a.dataset.symbol
-                            var val2 = b.dataset.symbol
+                            var val1 = a.dataset.symbol;
+                            var val2 = b.dataset.symbol;
                             if (val1 > val2) {
-                                return 1
+                                return 1;
                             } else {
-                                return -1
+                                return -1;
                             }
                         case ('price'):
-                            var val1 = parseFloat(a.dataset.price)
+                            var val1 = parseFloat(a.dataset.price);
                             var val2 = parseFloat(b.dataset.price)
-                            return val1 - val2
+                            return val1 - val2;
                         case ('rate'):
-                            var val1 = parseFloat(a.dataset.rate)
-                            var val2 = parseFloat(b.dataset.rate)
-                            return val1 - val2
+                            var val1 = parseFloat(a.dataset.rate);
+                            var val2 = parseFloat(b.dataset.rate);
+                            return val1 - val2;
                     }
                 });
             } else {
                 items.detach().sort(function (a, b) {
                     switch (query) {
                         case ('date'):
-                            var val1 = parseInt(a.dataset.date)
-                            var val2 = parseInt(b.dataset.date)
-                            return val2 - val1
+                            var val1 = parseInt(a.dataset.date);
+                            var val2 = parseInt(b.dataset.date);
+                            return val2 - val1;
                         case ('symbol'):
-                            var val1 = a.dataset.symbol
-                            var val2 = b.dataset.symbol
+                            var val1 = a.dataset.symbol;
+                            var val2 = b.dataset.symbol;
                             if (val1 > val2) {
-                                return -1
+                                return -1;
                             } else {
-                                return 1
+                                return 1;
                             }
                         case ('price'):
-                            var val1 = parseFloat(a.dataset.price)
-                            var val2 = parseFloat(b.dataset.price)
-                            return val2 - val1
+                            var val1 = parseFloat(a.dataset.price);
+                            var val2 = parseFloat(b.dataset.price);
+                            return val2 - val1;
                         case ('rate'):
-                            var val1 = parseFloat(a.dataset.rate)
-                            var val2 = parseFloat(b.dataset.rate)
-                            return val2 - val1
+                            var val1 = parseFloat(a.dataset.rate);
+                            var val2 = parseFloat(b.dataset.rate);
+                            return val2 - val1;
                     }
                 });
             }
